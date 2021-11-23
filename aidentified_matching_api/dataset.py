@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 import requests
 
-import aidentified_matching_api.token_service as token
 import aidentified_matching_api.constants as constants
+import aidentified_matching_api.token_service as token
 
 
 def list_datasets(args):
@@ -10,9 +11,9 @@ def list_datasets(args):
 
 
 def create_dataset(args):
-    dataset_payload = {
-        "name": args.name
-    }
-    resp_obj = token.token_service.api_call(args, requests.post, "/dataset/", json=dataset_payload)
+    dataset_payload = {"name": args.name}
+    resp_obj = token.token_service.api_call(
+        args, requests.post, "/dataset/", json=dataset_payload
+    )
 
     constants.pretty(resp_obj)

@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+import logging
 import os
 import time
-import requests
 import urllib.parse
-import logging
+
+import requests
 
 import aidentified_matching_api.constants as constants
 
@@ -19,7 +21,7 @@ class TokenService:
 
     def get_token(self, args) -> str:
         # For local debugging.
-        env_token = os.environ.get('AID_TOKEN')
+        env_token = os.environ.get("AID_TOKEN")
         if env_token is not None:
             return env_token
 
@@ -32,7 +34,9 @@ class TokenService:
         }
 
         try:
-            resp = requests.post(f"{constants.AIDENTIFIED_URL}/login", json=login_payload)
+            resp = requests.post(
+                f"{constants.AIDENTIFIED_URL}/login", json=login_payload
+            )
             resp_payload = resp.json()
         except requests.exceptions.RequestException as e:
             raise Exception(f"Unable to connect to API: {e}") from None
@@ -40,7 +44,9 @@ class TokenService:
         try:
             resp.raise_for_status()
         except requests.exceptions.RequestException:
-            raise Exception(f"Bad response from API: {resp.status_code} {resp_payload}") from None
+            raise Exception(
+                f"Bad response from API: {resp.status_code} {resp_payload}"
+            ) from None
 
         self.expires_at = resp_payload["expires_in"] + time.monotonic()
         self.token = resp_payload["bearer_token"]
