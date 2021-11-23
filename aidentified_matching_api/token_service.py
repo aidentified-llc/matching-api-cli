@@ -2,8 +2,12 @@ import os
 import time
 import requests
 import urllib.parse
+import logging
 
 import aidentified_matching_api.constants as constants
+
+
+logger = logging.getLogger("api")
 
 
 class TokenService:
@@ -27,9 +31,16 @@ class TokenService:
             "password": args.password,
         }
 
-        resp = requests.post(f"{constants.AIDENTIFIED_URL}/login", json=login_payload)
-        resp.raise_for_status()
-        resp_payload = resp.json()
+        try:
+            resp = requests.post(f"{constants.AIDENTIFIED_URL}/login", json=login_payload)
+            resp_payload = resp.json()
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Unable to connect to API: {e}") from None
+
+        try:
+            resp.raise_for_status()
+        except requests.exceptions.RequestException:
+            raise Exception(f"Bad response from API: {resp.status_code} {resp_payload}") from None
 
         self.expires_at = resp_payload["expires_in"] + time.monotonic()
         self.token = resp_payload["bearer_token"]
@@ -47,16 +58,17 @@ class TokenService:
         else:
             kwargs["headers"] = auth_headers
 
+        logger.info(f"{fn.__name__} {url}")
         try:
             resp = fn(f"{constants.AIDENTIFIED_URL}{url}", **kwargs)
             resp_obj = resp.json()
-        except requests.RequestException:
-            raise Exception("Unable to make API call")
+        except requests.RequestException as e:
+            raise Exception(f"Unable to make API call: {e}") from None
 
         try:
             resp.raise_for_status()
         except requests.RequestException:
-            raise Exception(f"Unable to make API call: {resp_obj}")
+            raise Exception(f"Unable to make API call: {resp_obj}") from None
 
         return resp_obj
 
@@ -77,6 +89,9 @@ class TokenService:
 
         return resp
 
+
+def get_token(args):
+    print(token_service.get_token(args))
 
 
 token_service = TokenService()
