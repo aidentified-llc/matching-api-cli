@@ -17,7 +17,7 @@ logger = logging.getLogger("matching_api_cli")
 def _get_dataset_id_from_dataset_name(args):
     dataset_params = {"name": args.dataset_name}
     resp_obj = token.token_service.api_call(
-        args, requests.get, "/dataset/", params=dataset_params
+        args, requests.get, "/v1/dataset/", params=dataset_params
     )
 
     if resp_obj["count"] == 0:
@@ -32,7 +32,7 @@ def _get_dataset_file_id_from_dataset_file_name(args):
         "name": args.dataset_file_name,
     }
     resp_obj = token.token_service.api_call(
-        args, requests.get, "/dataset-file/", params=dataset_params
+        args, requests.get, "/v1/dataset-file/", params=dataset_params
     )
 
     if resp_obj["count"] == 0:
@@ -46,7 +46,7 @@ def list_dataset_files(args):
         "dataset_name": args.dataset_name,
     }
     resp_obj = token.token_service.paginated_api_call(
-        args, requests.get, "/dataset-file/", params=dataset_file_params
+        args, requests.get, "/v1/dataset-file/", params=dataset_file_params
     )
     constants.pretty(resp_obj)
 
@@ -54,7 +54,7 @@ def list_dataset_files(args):
 def abort_dataset_file(args):
     dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
     resp_obj = token.token_service.api_call(
-        args, requests.post, f"/dataset-file/{dataset_file_id}/abort-upload/"
+        args, requests.post, f"/v1/dataset-file/{dataset_file_id}/abort-upload/"
     )
     constants.pretty(resp_obj)
 
@@ -65,7 +65,7 @@ def create_dataset_file(args):
 
     dataset_file_payload = {"dataset_id": dataset_id, "name": args.dataset_file_name}
     resp_obj = token.token_service.api_call(
-        args, requests.post, "/dataset-file/", json=dataset_file_payload
+        args, requests.post, "/v1/dataset-file/", json=dataset_file_payload
     )
 
     constants.pretty(resp_obj)
@@ -94,7 +94,7 @@ def _file_uploader(args, dataset_file_id: str, part_size_bytes: int, part_idx: i
         "md5": md5.decode("UTF-8"),
     }
     resp = token.token_service.api_call(
-        args, requests.post, "/dataset-file-upload-part/", json=upload_part_payload
+        args, requests.post, "/v1/dataset-file-upload-part/", json=upload_part_payload
     )
     upload_url = resp["upload_url"]
     dataset_file_upload_part_id = resp["dataset_file_upload_part_id"]
@@ -118,7 +118,7 @@ def _file_uploader(args, dataset_file_id: str, part_size_bytes: int, part_idx: i
     token.token_service.api_call(
         args,
         requests.patch,
-        f"/dataset-file-upload-part/{dataset_file_upload_part_id}/",
+        f"/v1/dataset-file-upload-part/{dataset_file_upload_part_id}/",
         json={"etag": upload_resp.headers["ETag"]},
     )
 
@@ -131,7 +131,7 @@ def upload_ctxmgr(args, dataset_file_id: str):
         yield
     except:  # noqa: E722
         token.token_service.api_call(
-            args, requests.post, f"/dataset-file/{dataset_file_id}/abort-upload/"
+            args, requests.post, f"/v1/dataset-file/{dataset_file_id}/abort-upload/"
         )
         raise
 
@@ -150,7 +150,7 @@ def upload_dataset_file(args):
     dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
 
     token.token_service.api_call(
-        args, requests.post, f"/dataset-file/{dataset_file_id}/initiate-upload/"
+        args, requests.post, f"/v1/dataset-file/{dataset_file_id}/initiate-upload/"
     )
 
     with contextlib.ExitStack() as stack:
@@ -187,7 +187,7 @@ def upload_dataset_file(args):
             raise Exception(f"Error(s) while uploading file: {exc_strings}")
 
     complete_resp = token.token_service.api_call(
-        args, requests.post, f"/dataset-file/{dataset_file_id}/complete-upload/"
+        args, requests.post, f"/v1/dataset-file/{dataset_file_id}/complete-upload/"
     )
     constants.pretty(complete_resp)
 
@@ -196,7 +196,7 @@ def download_dataset_file(args):
     dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
 
     resp_obj = token.token_service.api_call(
-        args, requests.get, f"/dataset-file/{dataset_file_id}/"
+        args, requests.get, f"/v1/dataset-file/{dataset_file_id}/"
     )
     if resp_obj["download_url"] is None:
         raise Exception("Dataset file is not ready for download.")
