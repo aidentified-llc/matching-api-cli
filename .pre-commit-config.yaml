@@ -11,6 +11,17 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
       - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-xml
+      - id: check-yaml
+      - id: debug-statements
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
   - repo: https://github.com/asottile/reorder_python_imports
     rev: v2.6.0
     hooks:
@@ -21,10 +32,6 @@ repos:
       - id: black
         language_version: python3.9
         args: ['-l', '88']
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
-    hooks:
-      - id: check-merge-conflict
   # Run flake8 last, to catch any remaining issues not caught/fixed by
   # the other hooks.
   - repo: https://gitlab.com/pycqa/flake8
