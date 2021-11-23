@@ -111,6 +111,23 @@ dataset_file_abort.add_argument(
 )
 dataset_file_abort.set_defaults(func=dataset_file.abort_dataset_file)
 
+dataset_file_download = dataset_files_subparser.add_parser(
+    "download", help="Download matched dataset file"
+)
+dataset_file_download.add_argument(
+    "--dataset-name", help="Name of parent dataset", required=True
+)
+dataset_file_download.add_argument(
+    "--dataset-file-name", help="Name of dataset file", required=True
+)
+dataset_file_download.add_argument(
+    "--dataset-file-path",
+    help="Destination of downloaded file (will truncate if exists)",
+    required=True,
+    type=argparse.FileType(mode="wb"),
+)
+dataset_file_download.set_defaults(func=dataset_file.download_dataset_file)
+
 
 def main():
     parsed = parser.parse_args()

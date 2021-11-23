@@ -190,3 +190,23 @@ def upload_dataset_file(args):
         args, requests.post, f"/dataset-file/{dataset_file_id}/complete-upload/"
     )
     constants.pretty(complete_resp)
+
+
+def download_dataset_file(args):
+    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+
+    resp_obj = token.token_service.api_call(
+        args, requests.get, f"/dataset-file/{dataset_file_id}/"
+    )
+    if resp_obj["download_url"] is None:
+        raise Exception("Dataset file is not ready for download.")
+
+    try:
+        download_req = requests.get(resp_obj["download_url"])
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Unable to download file: {e}") from None
+
+    for chunk in download_req.iter_content(chunk_size=1024 * 1024 * 1024):
+        args.dataset_file_path.write(chunk)
+
+    args.dataset_file_path.close()
