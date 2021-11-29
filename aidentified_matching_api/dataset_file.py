@@ -210,3 +210,11 @@ def download_dataset_file(args):
         args.dataset_file_path.write(chunk)
 
     args.dataset_file_path.close()
+
+
+def delete_dataset_file(args):
+    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+
+    token.token_service.api_call(
+        args, requests.delete, f"/v1/dataset-file/{dataset_file_id}/"
+    )

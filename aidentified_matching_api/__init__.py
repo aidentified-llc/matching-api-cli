@@ -49,6 +49,10 @@ dataset_create = dataset_subparser.add_parser("create", help="Create new dataset
 dataset_create.add_argument("--name", help="Dataset name", required=True)
 dataset_create.set_defaults(func=dataset.create_dataset)
 
+dataset_delete = dataset_subparser.add_parser("delete", help="Delete dataset")
+dataset_delete.add_argument("--name", help="Dataset name", required=True)
+dataset_delete.set_defaults(func=dataset.delete_dataset)
+
 #
 # dataset-file
 #
@@ -127,6 +131,18 @@ dataset_file_download.add_argument(
     type=argparse.FileType(mode="wb"),
 )
 dataset_file_download.set_defaults(func=dataset_file.download_dataset_file)
+
+
+dataset_file_delete = dataset_files_subparser.add_parser(
+    "delete", help="Delete dataset file"
+)
+dataset_file_delete.add_argument(
+    "--dataset-name", help="Name of parent dataset", required=True
+)
+dataset_file_delete.add_argument(
+    "--dataset-file-name", help="Name of dataset file", required=True
+)
+dataset_file_delete.set_defaults(func=dataset_file.delete_dataset_file)
 
 
 def main():

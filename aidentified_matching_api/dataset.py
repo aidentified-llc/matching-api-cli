@@ -19,3 +19,11 @@ def create_dataset(args):
     )
 
     constants.pretty(resp_obj)
+
+
+def delete_dataset(args):
+    dataset_payload = {"name": args.name}
+
+    token.token_service.api_call(
+        args, requests.delete, "/v1/dataset/", json=dataset_payload
+    )
