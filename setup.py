@@ -10,7 +10,7 @@ setup(
     packages=["aidentified_matching_api"],
     # Let's not force all the hard requirements out from requirements.txt
     # in case people are installing this thing into their system Pythons.
-    install_requires=["requirements>=2.26.0"],
+    install_requires=["requests>=2.26.0"],
     entry_points={
         "console_scripts": ["aidentified_match=aidentified_matching_api:main"]
     },

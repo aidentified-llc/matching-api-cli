@@ -28,6 +28,8 @@ class TokenService:
         if time.monotonic() < self.expires_at:
             return self.token
 
+        # N.B. these are read from envvars AID_EMAIL and
+        # AID_PASSWORD by default
         login_payload = {
             "email": args.email,
             "password": args.password,
