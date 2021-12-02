@@ -216,7 +216,7 @@ dataset_file_event_download = dataset_file_event_subparser.add_parser(
     help="Download a dataset event file",
     parents=[
         _get_dataset_file_parent(
-            dataset_file_name=True, dataset_file_Download=True, file_date=True
+            dataset_file_name=True, dataset_file_download=True, file_date=True
         )
     ],
 )
