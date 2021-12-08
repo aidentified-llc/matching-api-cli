@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import pickle
 import time
 import urllib.parse
 
+import appdirs
 import requests
 
 import aidentified_matching_api.constants as constants
@@ -13,17 +15,33 @@ logger = logging.getLogger("api")
 
 
 class TokenService:
-    __slots__ = ["expires_at", "token"]
+    __slots__ = ["expires_at", "token", "cache_file"]
 
     def __init__(self):
         self.expires_at = 0
         self.token = ""
+        dirs = appdirs.AppDirs(
+            appname="aidentified_match", appauthor="Aidentified", version="1.0"
+        )
+        os.makedirs(dirs.user_cache_dir, exist_ok=True)
+        self.cache_file = os.path.join(dirs.user_cache_dir, "token_cache")
+
+    def _read_token_cache(self):
+        try:
+            with open(self.cache_file, "rb") as fd:
+                token_cache = pickle.load(fd)
+                self.token = token_cache.get("token", "")
+                self.expires_at = token_cache.get("expires_at", 0)
+        except FileNotFoundError:
+            pass
+
+    def _write_token_cache(self):
+        cache_value = {"token": self.token, "expires_at": self.expires_at}
+        with open(self.cache_file, "wb") as fd:
+            pickle.dump(cache_value, fd, protocol=pickle.HIGHEST_PROTOCOL)
 
     def get_token(self, args) -> str:
-        # For local debugging.
-        env_token = os.environ.get("AID_TOKEN")
-        if env_token is not None:
-            return env_token
+        self._read_token_cache()
 
         if time.monotonic() < self.expires_at:
             return self.token
@@ -52,6 +70,8 @@ class TokenService:
 
         self.expires_at = resp_payload["expires_in"] + time.monotonic()
         self.token = resp_payload["bearer_token"]
+
+        self._write_token_cache()
 
         return self.token
 
