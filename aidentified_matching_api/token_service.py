@@ -124,6 +124,12 @@ class TokenService:
 
 
 def get_token(args):
+    if args.clear_cache:
+        try:
+            os.remove(token_service.cache_file)
+        except FileNotFoundError:
+            pass
+
     print(token_service.get_token(args))
 
 

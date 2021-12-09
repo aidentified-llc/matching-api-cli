@@ -35,6 +35,9 @@ subparser = parser.add_subparsers()
 #
 
 token_parser = subparser.add_parser("auth", help="Print JWT token")
+token_parser.add_argument(
+    "--clear-cache", help="Delete cached token", action="store_true"
+)
 token_parser.set_defaults(func=token_service.get_token)
 
 #
