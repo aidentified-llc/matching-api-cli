@@ -71,10 +71,6 @@ def create_dataset_file(args):
     constants.pretty(resp_obj)
 
 
-# XXX feedback to jenson
-# XXX open pr in other repo
-
-
 def _file_uploader(args, dataset_file_id: str, part_size_bytes: int, part_idx: int):
     aws_part_number = part_idx + 1
     part_start = part_idx * part_size_bytes
@@ -134,12 +130,6 @@ def upload_ctxmgr(args, dataset_file_id: str):
             args, requests.post, f"/v1/dataset-file/{dataset_file_id}/abort-upload/"
         )
         raise
-
-
-logging.getLogger("").setLevel(logging.DEBUG)
-requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.DEBUG)
-requests_log.propagate = True
 
 
 def upload_dataset_file(args):

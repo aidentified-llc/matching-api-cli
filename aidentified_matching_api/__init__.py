@@ -191,7 +191,11 @@ dataset_file_delta_list.set_defaults(func=daily_files.list_dataset_file_deltas)
 dataset_file_delta_download = dataset_file_delta_subparser.add_parser(
     "download",
     help="Download a dataset delta file",
-    parents=[_get_dataset_file_parent(dataset_file_name=True, file_date=True)],
+    parents=[
+        _get_dataset_file_parent(
+            dataset_file_name=True, dataset_file_download=True, file_date=True
+        )
+    ],
 )
 dataset_file_delta_download.set_defaults(func=daily_files.download_dataset_file_delta)
 
