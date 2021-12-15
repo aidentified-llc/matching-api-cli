@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import codecs
 import csv
+import io
 
 # first_name - string - required
 # last_name - string - required
@@ -45,6 +46,7 @@ HEADERS = {
 
 class CsvArgs:
     __slots__ = [
+        "raw_fd",
         "codec_info",
         "delimiter",
         "doublequotes",
@@ -55,6 +57,7 @@ class CsvArgs:
 
     def __init__(
         self,
+        raw_fd: io.BytesIO,
         codec_info: codecs.CodecInfo,
         delimiter: str,
         doublequotes: bool,
@@ -62,6 +65,7 @@ class CsvArgs:
         quoting: int,
         skipinitialspace: bool,
     ):
+        self.raw_fd = raw_fd
         self.codec_info = codec_info
         self.delimiter = delimiter
         self.doublequotes = doublequotes
@@ -79,17 +83,16 @@ def _csv_read(csv_reader, record_idx):
         raise Exception(f"Bad character encoding at byte {e.start}") from None
 
 
-def validate(args):
-    if args.no_validate:
-        return
-
-    # If encoding is requested, wrap with special decoder.
+def validate(args) -> CsvArgs:
+    # Validate choice of csv encoding, even if they don't do
+    # the rest of the validation.
     try:
         codec_info = codecs.lookup(args.csv_encoding)
     except LookupError:
         raise Exception(f"Unknown csv-encoding '{args.csv_encoding}'") from None
 
     csv_args = CsvArgs(
+        args.dataset_file_path,
         codec_info,
         args.delimiter,
         args.csv_no_doublequotes,
@@ -98,14 +101,17 @@ def validate(args):
         args.csv_skip_initial_space,
     )
 
-    fd = args.dataset_file_path
-    validate_fd(fd, csv_args)
-    fd.seek(0)
+    if args.no_validate:
+        return csv_args
+
+    validate_fd(csv_args)
+    args.dataset_file_path.seek(0)
+
+    return csv_args
 
 
-def validate_fd(fd, csv_args: CsvArgs):
-
-    text_fd = csv_args.codec_info.streamreader(fd)
+def validate_fd(csv_args: CsvArgs):
+    text_fd = csv_args.codec_info.streamreader(csv_args.raw_fd)
 
     csv_reader = csv.reader(
         text_fd,

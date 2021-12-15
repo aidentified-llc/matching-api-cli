@@ -10,16 +10,15 @@ from aidentified_matching_api.validation import validate_fd
 
 
 UTF_8 = codecs.lookup("UTF-8")
-LATIN_1 = codecs.lookup("latin_1")
 
-ORDINARY_CSV_ARGS = CsvArgs(
+ORDINARY_CSV_ARGS = [
     UTF_8,
     csv.excel.delimiter,
     csv.excel.doublequote,
     csv.excel.quotechar,
     csv.excel.quoting,
     csv.excel.skipinitialspace,
-)
+]
 
 TEST_DATA = [
     (b'"xyz,xyz\nxyz,xyz', "Bad CSV format in row 1: unexpected end of data"),
@@ -39,8 +38,9 @@ TEST_DATA = [
 @pytest.mark.parametrize("buffer, exc_msg", TEST_DATA)
 def test_exc_validation(buffer, exc_msg):
     fd = io.BytesIO(buffer)
+    csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
 
     with pytest.raises(Exception) as exc:
-        validate_fd(fd, ORDINARY_CSV_ARGS)
+        validate_fd(csv_args)
 
     assert str(exc.value) == exc_msg
