@@ -1,0 +1,169 @@
+# -*- coding: utf-8 -*-
+import codecs
+import csv
+
+# first_name - string - required
+# last_name - string - required
+# id - string - optional; unique
+# street_address_1 - string - optional; home street
+# street_address_2 - string - optional; home street 2
+# city - string - optional; home city
+# state - string - optional; home state
+# postal_code - string - optional; 5 digit postal code
+# company - string - optional; name of the company of employment
+# title - string - optional; job title
+# school[_{n}] - string - optional; n in 1 to 10, name of the school of employment
+# email[_{n}] - string - optional; n in 1 to 10
+# phone[_{n}] - string - optional; n in 1 to 10, 10 digit phone formatted 5558675309
+# domain[_{n}] - string - optional; n in 1 to 10, email domain such as "aidentified.com"
+# linkedin[_{n}] - string - optional; n in 1 to 10
+
+
+HEADERS = {
+    "first_name",
+    "last_name",
+    "id",
+    "street_address_1",
+    "street_address_2",
+    "city",
+    "state",
+    "postal_code",
+    "company",
+    "title",
+    "school",
+    "email",
+    "phone",
+    "domain",
+    "linkedin",
+    *[f"school_{idx}" for idx in range(1, 11)],
+    *[f"email_{idx}" for idx in range(1, 11)],
+    *[f"phone_{idx}" for idx in range(1, 11)],
+    *[f"domain_{idx}" for idx in range(1, 11)],
+    *[f"linkedin_{idx}" for idx in range(1, 11)],
+}
+
+
+class CsvArgs:
+    __slots__ = [
+        "codec_info",
+        "delimiter",
+        "doublequotes",
+        "quotechar",
+        "quoting",
+        "skipinitialspace",
+    ]
+
+    def __init__(
+        self,
+        codec_info: codecs.CodecInfo,
+        delimiter: str,
+        doublequotes: bool,
+        quotechar: str,
+        quoting: int,
+        skipinitialspace: bool,
+    ):
+        self.codec_info = codec_info
+        self.delimiter = delimiter
+        self.doublequotes = doublequotes
+        self.quotechar = quotechar
+        self.quoting = quoting
+        self.skipinitialspace = skipinitialspace
+
+
+def _csv_read(csv_reader, record_idx):
+    try:
+        return next(csv_reader)
+    except csv.Error as e:
+        raise Exception(f"Bad CSV format in row {record_idx}: {e}") from None
+    except UnicodeError as e:
+        raise Exception(f"Bad character encoding at byte {e.start}") from None
+
+
+def validate(args):
+    if args.no_validate:
+        return
+
+    # If encoding is requested, wrap with special decoder.
+    try:
+        codec_info = codecs.lookup(args.csv_encoding)
+    except LookupError:
+        raise Exception(f"Unknown csv-encoding '{args.csv_encoding}'") from None
+
+    csv_args = CsvArgs(
+        codec_info,
+        args.delimiter,
+        args.csv_no_doublequotes,
+        args.csv_quotechar,
+        args.csv_quoting,
+        args.csv_skip_initial_space,
+    )
+
+    fd = args.dataset_file_path
+    validate_fd(fd, csv_args)
+    fd.seek(0)
+
+
+def validate_fd(fd, csv_args: CsvArgs):
+
+    text_fd = csv_args.codec_info.streamreader(fd)
+
+    csv_reader = csv.reader(
+        text_fd,
+        delimiter=csv_args.delimiter,
+        doublequote=csv_args.doublequotes,
+        quotechar=csv_args.quotechar,
+        quoting=csv_args.quoting,
+        skipinitialspace=csv_args.skipinitialspace,
+        strict=True,
+    )
+
+    record_idx = 1
+
+    try:
+        headers = _csv_read(csv_reader, record_idx)
+    except StopIteration:
+        raise Exception("No headers in file") from None
+
+    for header in headers:
+        if header.lower() not in HEADERS:
+            raise Exception(f"Invalid header {header}")
+
+    record_len = len(headers)
+
+    try:
+        id_idx = headers.index("id")
+    except ValueError:
+        id_idx = None
+    id_uniqueness = set()
+
+    required_header_idxes = []
+    for required_header in ("first_name", "last_name"):
+        if required_header not in headers:
+            raise Exception(f"Required header {required_header} not in headers")
+
+        required_header_idxes.append((required_header, headers.index(required_header)))
+
+    record_idx += 1
+
+    while True:
+        try:
+            record = _csv_read(csv_reader, record_idx)
+        except StopIteration:
+            break
+
+        if len(record) != record_len:
+            raise Exception(f"Row {record_idx} does not match header length")
+
+        if id_idx is not None:
+            cust_id = record[id_idx]
+            if cust_id in id_uniqueness:
+                raise Exception(f"Row {record_idx} has duplicate id '{cust_id}'")
+            id_uniqueness.add(cust_id)
+
+        for required_header, required_header_idx in required_header_idxes:
+            if not record[required_header_idx]:
+                raise Exception(
+                    f"Row {record_idx} has invalid value for {required_header}"
+                )
+
+        record_idx += 1

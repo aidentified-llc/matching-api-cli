@@ -10,6 +10,7 @@ import requests
 
 import aidentified_matching_api.constants as constants
 import aidentified_matching_api.token_service as token
+import aidentified_matching_api.validation as validation
 
 logger = logging.getLogger("matching_api_cli")
 
@@ -136,6 +137,8 @@ def upload_dataset_file(args):
     if args.upload_part_size < 5:
         raise Exception("--upload-part-size must be greater than 5 Mb")
     part_size_bytes = args.upload_part_size * 1024 * 1024
+
+    validation.validate(args)
 
     dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
 

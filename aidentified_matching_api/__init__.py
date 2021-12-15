@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import argparse
+import csv
 import datetime
 import logging
 import os
@@ -78,6 +79,7 @@ def _get_dataset_file_parent(
     dataset_file_upload=False,
     dataset_file_download=False,
     file_date=False,
+    validation=False,
 ):
     _dataset_file_parent = argparse.ArgumentParser(add_help=False)
     _dataset_parent_group = _dataset_file_parent.add_argument_group(
@@ -96,7 +98,7 @@ def _get_dataset_file_parent(
     if dataset_file_upload:
         _dataset_parent_group.add_argument(
             "--dataset-file-path",
-            help="Path to dataset file",
+            help="Path to local file for upload",
             required=True,
             type=argparse.FileType(mode="rb"),
         )
@@ -114,7 +116,58 @@ def _get_dataset_file_parent(
             "--file-date",
             help="Date of the delta file in YYYY-MM-DD format",
             required=True,
-            type=lambda s: datetime.datetime.strptime("%Y-%m-%d"),
+            type=lambda s: datetime.datetime.strptime("%Y-%m-%d", s),
+        )
+
+    if validation:
+        _dataset_parent_group.add_argument(
+            "--no-validate",
+            help="Disable client-side validation of CSV file upload",
+            action="store_false",
+        )
+
+        _dataset_parent_group.add_argument(
+            "--csv-encoding",
+            help="Re-encode text CSV file before uploading. (default 'UTF-8') A list of supported encodings is at https://docs.python.org/3/library/codecs.html#standard-encodings",
+            default="UTF-8",
+        )
+
+        _dataset_parent_group.add_argument(
+            "--csv-delimiter",
+            help=f"Specify CSV delimiter (default '{csv.excel.delimiter}')",
+            default=csv.excel.delimiter,
+        )
+
+        _dataset_parent_group.add_argument(
+            "--csv-no-doublequotes",
+            help="Controls how instances of csv-quotechar appearing inside a field should themselves be quoted. By default, the character is doubled. With csv-no-doublequotes the csv-escapechar is used as a prefix to the csv-quotechar.",
+            action="store_false",
+        )
+
+        _dataset_parent_group.add_argument(
+            "--csv-quotechar",
+            help=f"A one-character string used to quote fields containing special characters, such as the csv-delimiter or csv-quotechar, or which contain new-line characters. (default '{csv.excel.quotechar}')",
+            default=csv.excel.quotechar,
+        )
+
+        QUOTE_METHODS = {
+            "all": csv.QUOTE_ALL,
+            "minimal": csv.QUOTE_MINIMAL,
+            "none": csv.QUOTE_NONE,
+        }
+
+        _dataset_parent_group.add_argument(
+            "--csv-quoting",
+            help="Specify CSV quoting behavior. (default 'minimal'). all: quote all fields. minimal: only quote fields that need escaping. none: fields are never quoted.",
+            default="minimal",
+            choices=QUOTE_METHODS.keys(),
+            type=lambda s: QUOTE_METHODS[s],
+        )
+
+        _dataset_parent_group.add_argument(
+            "--csv-skip-initial-space",
+            help="Ignore whitespace immediately following a csv-delimiter.",
+            action="store_true",
         )
 
     return _dataset_file_parent
@@ -136,7 +189,9 @@ dataset_file_create = dataset_files_subparser.add_parser(
     "upload",
     help="Upload dataset file",
     parents=[
-        _get_dataset_file_parent(dataset_file_name=True, dataset_file_upload=True)
+        _get_dataset_file_parent(
+            dataset_file_name=True, dataset_file_upload=True, validation=True
+        )
     ],
 )
 dataset_file_create.add_argument(
