@@ -98,8 +98,11 @@ are arbitrary, they don't have to match any file names on your file system. This
 
 ### dataset-file upload
 ```shell
-aidentified_match dataset-file upload --dataset-name DATASET_NAME --dataset-file-name DATASET_FILE_NAME --dataset-file-path DATASET_FILE_PATH
-                                      [--upload-part-size UPLOAD_PART_SIZE] [--concurrent-uploads CONCURRENT_UPLOADS]
+aidentified_match dataset-file upload [-h] --dataset-name DATASET_NAME --dataset-file-name DATASET_FILE_NAME --dataset-file-path
+                                      DATASET_FILE_PATH [--no-validate] [--csv-encoding CSV_ENCODING] [--csv-delimiter CSV_DELIMITER]
+                                      [--csv-no-doublequotes] [--csv-escapechar CSV_ESCAPECHAR] [--csv-quotechar CSV_QUOTECHAR]
+                                      [--csv-quoting {all,minimal,none}] [--csv-skip-initial-space] [--upload-part-size UPLOAD_PART_SIZE]
+                                      [--concurrent-uploads CONCURRENT_UPLOADS]
 ```
 Upload a CSV for enrichment. The dataset-file must be created with `dataset-file create` before you can begin the upload.
 The dataset must also be in the `UPLOAD_NOT_STARTED` state.
@@ -107,6 +110,23 @@ The dataset must also be in the `UPLOAD_NOT_STARTED` state.
 By default, your file will be uploaded in parallel parts. Each part will be at most 100 MB in size and there will be
 four concurrent uploads. The optional `--upload-part-size` and `--concurrent-uploads` arguments can be used to tweak
 those defaults.
+
+The uploader will do a pass over your CSV to do a simple validation of its content and structure. If you know your
+files are well-formatted you can skip it with `--no-validate`.
+
+CSV files are expected to be encoded in UTF-8, use commas as the field delimiter, and use double quotes for field
+quoting. The `--csv` flags direct the uploader to translate your CSV file on-the-fly before validation and uploading
+if your files don't match that format.
+
+| Flag                       | Description                                                                                                                                |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `--csv-encoding`           | Override default encoding of UTF-8. [Browse the list of encodings.](https://docs.python.org/3/library/codecs.html#standard-encodings)      |
+| `--csv-delimiter`          | Specify the character used to delimit fields.                                                                                              |
+| `--csv-no-doublequotes`    | Allow quoting using the `--csv-escapechar` field. Must also specify `--csv-quoting none`                                                   |
+| `--csv-escapechar`         | The character to use for escaping the delimiter in `--csv-no-doublequotes` mode.                                                           |
+| `--csv-quotechar`          | The character to use for quoting fields.                                                                                                   |
+| `--csv-quoting`            | Specify that the csv uses no quoting (none), only quotes fields requiring quoting (minimal), or all fields are quoted automatically (full) |
+| `--csv-skip-initial-space` | Ignore whitespace immediately after the delimiter (default is to not ignore)                                                               |
 
 ### dataset-file abort
 ```shell

@@ -50,6 +50,7 @@ class CsvArgs:
         "codec_info",
         "delimiter",
         "doublequotes",
+        "escapechar",
         "quotechar",
         "quoting",
         "skipinitialspace",
@@ -61,14 +62,16 @@ class CsvArgs:
         codec_info: codecs.CodecInfo,
         delimiter: str,
         doublequotes: bool,
+        escapechar: str,
         quotechar: str,
         quoting: int,
         skipinitialspace: bool,
     ):
         self.raw_fd = raw_fd
         self.codec_info = codec_info
-        self.delimiter = delimiter
+        self.delimiter = delimiter.replace("\\t", "\t")
         self.doublequotes = doublequotes
+        self.escapechar = escapechar
         self.quotechar = quotechar
         self.quoting = quoting
         self.skipinitialspace = skipinitialspace
@@ -96,6 +99,7 @@ def validate(args) -> CsvArgs:
         codec_info,
         args.delimiter,
         args.csv_no_doublequotes,
+        args.csv_escapechar,
         args.csv_quotechar,
         args.csv_quoting,
         args.csv_skip_initial_space,
@@ -117,6 +121,7 @@ def validate_fd(csv_args: CsvArgs):
         text_fd,
         delimiter=csv_args.delimiter,
         doublequote=csv_args.doublequotes,
+        escapechar=csv_args.escapechar,
         quotechar=csv_args.quotechar,
         quoting=csv_args.quoting,
         skipinitialspace=csv_args.skipinitialspace,

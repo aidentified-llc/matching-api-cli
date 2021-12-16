@@ -134,7 +134,7 @@ def _get_dataset_file_parent(
 
         _dataset_parent_group.add_argument(
             "--csv-delimiter",
-            help=f"Specify CSV delimiter (default '{csv.excel.delimiter}')",
+            help=f"Specify CSV delimiter (default '{csv.excel.delimiter}'). A \\t will be interpreted as the tab character (0x09.)",
             default=csv.excel.delimiter,
         )
 
@@ -142,6 +142,12 @@ def _get_dataset_file_parent(
             "--csv-no-doublequotes",
             help="Controls how instances of csv-quotechar appearing inside a field should themselves be quoted. By default, the character is doubled. With csv-no-doublequotes the csv-escapechar is used as a prefix to the csv-quotechar.",
             action="store_false",
+        )
+
+        _dataset_parent_group.add_argument(
+            "--csv-escapechar",
+            help="The character used to escape the delimiter in fields. By default this is not enabled, you must pass --csv-no-doublequotes --csv-quoting none along with it to use it.",
+            default=csv.excel.escapechar,
         )
 
         _dataset_parent_group.add_argument(

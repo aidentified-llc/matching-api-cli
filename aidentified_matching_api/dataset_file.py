@@ -169,6 +169,7 @@ async def rewrite_csv(
         read_fd,
         delimiter=csv_args.delimiter,
         doublequote=csv_args.doublequotes,
+        escapechar=csv_args.escapechar,
         quotechar=csv_args.quotechar,
         quoting=csv_args.quoting,
         skipinitialspace=csv_args.skipinitialspace,

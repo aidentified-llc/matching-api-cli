@@ -15,10 +15,13 @@ ORDINARY_CSV_ARGS = [
     UTF_8,
     csv.excel.delimiter,
     csv.excel.doublequote,
+    csv.excel.escapechar,
     csv.excel.quotechar,
     csv.excel.quoting,
     csv.excel.skipinitialspace,
 ]
+
+# XXX validate tab separation
 
 TEST_DATA = [
     (b'"xyz,xyz\nxyz,xyz', "Bad CSV format in row 1: unexpected end of data"),
@@ -44,3 +47,19 @@ def test_exc_validation(buffer, exc_msg):
         validate_fd(csv_args)
 
     assert str(exc.value) == exc_msg
+
+
+def test_tsv():
+    fd = io.BytesIO(b"first_name\tlast_name\nfoo\tbar")
+    csv_args = CsvArgs(
+        fd,
+        UTF_8,
+        "\\t",
+        csv.excel.doublequote,
+        csv.excel.escapechar,
+        csv.excel.quotechar,
+        csv.QUOTE_NONE,
+        csv.excel.skipinitialspace,
+    )
+
+    validate_fd(csv_args)
