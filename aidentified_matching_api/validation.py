@@ -137,7 +137,7 @@ def validate_fd(csv_args: CsvArgs):
 
     for header in headers:
         if header.lower() not in HEADERS:
-            raise Exception(f"Invalid header {header}")
+            raise Exception(f"Invalid header '{header}'")
 
     record_len = len(headers)
 
