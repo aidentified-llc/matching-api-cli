@@ -17,7 +17,9 @@ the Aidentified contact matching and enrichment service. You can assign whatever
 `dataset`s and `datset-file`s. Once a `dataset-file`'s upload is finished it can not be modified, but you can
 always create new `dataset-file`s and delete old ones.
 
-XXX validation.
+Files must be formatted as comma-separated CSVs in the UTF-8 encoding. If your input is not in that format
+you can use the `--csv-` options to `dataset-file upload` to specify the properties of your CSV and this program
+will translate your CSV to the expected format while it uploads.
 
 Once your upload of the `dataset-file` is finished the Aidentified matching service will start processing your file.
 The initial run of the matcher will output enriched attributes for every single matched contact in your input file.
@@ -51,8 +53,10 @@ The full list of states:
 * UPLOAD_NOT_STARTED: The initial state for a new `dataset-file`
 * UPLOAD_IN_PROGRESS: The upload for the `dataset-file` was successfully initiated. Aborting the upload will return it
 to `UPLOAD_NOT_STARTED` and remove any partially uploaded files.
-* MATCHING_IN_PROGRESS: The upload was successful and the Aidentified matcher is running. It is not possible to
+* VALIDATION_IN_PROGRESS: The CSV upload is complete and server-side validation is running. It is not possible to
 return to `UPLOAD_NOT_STARTED` from here as `dataset-file`s are immutable.
+* VALIDATION_ERROR: Validation of the file failed. An error message is available in the output of `dataset-file list`.
+* MATCHING_IN_PROGRESS: The upload was successful and the Aidentified matcher is running.
 * MATCHING_ERROR: The Aidentified matcher was unable to complete the initial matching. An error message is available
 in the output of `dataset-file list`.
 * MATCHING_FINISHED: The initial matching of the `dataset-file` is complete and the fully-matched file is available
