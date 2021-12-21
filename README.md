@@ -29,7 +29,7 @@ attributes for your contacts you  must download the `delta` files, which are pro
 Aidentified system.
 
 There is also a nightly `event` file produced for each `dataset-file` that lists the most recent Money in Motion events
-for each matched contact.
+for each matched contact. These files are returned in a CSV format.
 
 The `dataset-file` follows a state machine through its matching process. The current state is available as the `status`
 field in the objects written to stdout by the `dataset-file list` subcommand. As an example:
@@ -167,7 +167,7 @@ aidentified_match dataset-file delta download --dataset-name DATASET_NAME --data
                                               --dataset-file-path DATASET_FILE_PATH --file-date FILE_DATE
 ```
 Download a nightly delta file for dataset-file `DATASET_FILE_NAME` and date `FILE_DATE` to the `DATASET_FILE_PATH` location,
-creating a new file if one does not exist and truncating any existing files.
+creating a new file if one does not exist and truncating any existing files. Delta files are CSV files.
 
 ### dataset-file event list
 ```shell
@@ -181,4 +181,4 @@ aidentified_match dataset-file event download --dataset-name DATASET_NAME --data
                                               --dataset-file-path DATASET_FILE_PATH --file-date FILE_DATE
 ```
 Download a nightly event file for dataset-file `DATASET_FILE_NAME` and date `FILE_DATE` to the `DATASET_FILE_PATH` location,
-creating a new file if one does not exist and truncating any existing files.
+creating a new file if one does not exist and truncating any existing files. Event files are CSV files.
