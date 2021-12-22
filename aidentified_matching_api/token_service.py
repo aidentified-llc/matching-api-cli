@@ -94,8 +94,12 @@ class TokenService:
 
         logger.info(f"{fn.__name__} {url}")
         try:
-            resp = fn(f"{constants.AIDENTIFIED_URL}{url}", **kwargs)
-            resp_obj = resp.json()
+            resp: requests.Response = fn(f"{constants.AIDENTIFIED_URL}{url}", **kwargs)
+
+            if not resp.content:
+                resp_obj = {}
+            else:
+                resp_obj = resp.json()
         except requests.RequestException as e:
             raise Exception(f"Unable to make API call: {e}") from None
 
