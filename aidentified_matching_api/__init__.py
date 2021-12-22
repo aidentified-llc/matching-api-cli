@@ -120,37 +120,41 @@ def _get_dataset_file_parent(
         )
 
     if validation:
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group = _dataset_file_parent.add_argument_group(
+            title="CSV arguments"
+        )
+        _dataset_csv_group.add_argument(
             "--no-validate",
             help="Disable client-side validation of CSV file upload",
             action="store_false",
+            dest="validate",
         )
 
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group.add_argument(
             "--csv-encoding",
             help="Re-encode text CSV file before uploading. (default 'UTF-8') A list of supported encodings is at https://docs.python.org/3/library/codecs.html#standard-encodings",
             default="UTF-8",
         )
 
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group.add_argument(
             "--csv-delimiter",
             help=f"Specify CSV delimiter (default '{csv.excel.delimiter}'). A \\t will be interpreted as the tab character (0x09.)",
             default=csv.excel.delimiter,
         )
 
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group.add_argument(
             "--csv-no-doublequotes",
             help="Controls how instances of csv-quotechar appearing inside a field should themselves be quoted. By default, the character is doubled. With csv-no-doublequotes the csv-escapechar is used as a prefix to the csv-quotechar.",
             action="store_false",
         )
 
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group.add_argument(
             "--csv-escapechar",
             help="The character used to escape the delimiter in fields. By default this is not enabled, you must pass --csv-no-doublequotes --csv-quoting none along with it to use it.",
             default=csv.excel.escapechar,
         )
 
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group.add_argument(
             "--csv-quotechar",
             help=f"A one-character string used to quote fields containing special characters, such as the csv-delimiter or csv-quotechar, or which contain new-line characters. (default '{csv.excel.quotechar}')",
             default=csv.excel.quotechar,
@@ -162,7 +166,7 @@ def _get_dataset_file_parent(
             "none": csv.QUOTE_NONE,
         }
 
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group.add_argument(
             "--csv-quoting",
             help="Specify CSV quoting behavior. (default 'minimal'). all: quote all fields. minimal: only quote fields that need escaping. none: fields are never quoted.",
             default="minimal",
@@ -170,7 +174,7 @@ def _get_dataset_file_parent(
             type=lambda s: QUOTE_METHODS[s],
         )
 
-        _dataset_parent_group.add_argument(
+        _dataset_csv_group.add_argument(
             "--csv-skip-initial-space",
             help="Ignore whitespace immediately following a csv-delimiter.",
             action="store_true",

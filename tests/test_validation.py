@@ -21,13 +21,11 @@ ORDINARY_CSV_ARGS = [
     csv.excel.skipinitialspace,
 ]
 
-# XXX validate tab separation
-
 TEST_DATA = [
     (b'"xyz,xyz\nxyz,xyz', "Bad CSV format in row 1: unexpected end of data"),
     ("foo,bar\n".encode("UTF-16"), "Bad character encoding at byte 0"),
     (b"", "No headers in file"),
-    (b"intentionally_invalid_header", "Invalid header intentionally_invalid_header"),
+    (b"intentionally_invalid_header", "Invalid header 'intentionally_invalid_header'"),
     (b"first_name,city", "Required header last_name not in headers"),
     (b"first_name,last_name,city\nfoo,bar\n", "Row 2 does not match header length"),
     (

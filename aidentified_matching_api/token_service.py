@@ -53,6 +53,7 @@ class TokenService:
             "password": args.password,
         }
 
+        logger.info("get_token /login")
         try:
             resp = requests.post(
                 f"{constants.AIDENTIFIED_URL}/login", json=login_payload

@@ -97,7 +97,7 @@ def validate(args) -> CsvArgs:
     csv_args = CsvArgs(
         args.dataset_file_path,
         codec_info,
-        args.delimiter,
+        args.csv_delimiter,
         args.csv_no_doublequotes,
         args.csv_escapechar,
         args.csv_quotechar,
@@ -105,7 +105,7 @@ def validate(args) -> CsvArgs:
         args.csv_skip_initial_space,
     )
 
-    if args.no_validate:
+    if not args.validate:
         return csv_args
 
     validate_fd(csv_args)

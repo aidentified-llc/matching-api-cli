@@ -86,7 +86,7 @@ async def file_uploader(args, dataset_file_id: str, part_queue: asyncio.Queue):
         part_idx, part_data = await part_queue.get()
         aws_part_number = part_idx + 1
 
-        logger.info(f"Starting upload part {aws_part_number} hash and compression")
+        logger.info(f"Starting upload part {aws_part_number} hash")
         md5 = await loop.run_in_executor(
             None, lambda data: base64.b64encode(hashlib.md5(data).digest()), part_data
         )
@@ -151,6 +151,9 @@ def upload_abort_ctxmgr(args, dataset_file_id: str):
         raise
 
 
+SENTINEL = object()
+
+
 async def rewrite_csv(
     csv_args: validation.CsvArgs, part_size_bytes: int, part_queue: asyncio.Queue
 ):
@@ -178,9 +181,8 @@ async def rewrite_csv(
     writer = csv.writer(out_text_fd, quoting=csv.QUOTE_MINIMAL)
 
     while True:
-        try:
-            row = await loop.run_in_executor(None, lambda: next(reader))
-        except StopIteration:
+        row = await loop.run_in_executor(None, next, reader, SENTINEL)
+        if row is SENTINEL:
             break
 
         writer.writerow(row)
@@ -193,37 +195,50 @@ async def rewrite_csv(
         out_bytes_fd.seek(0)
         out_bytes_fd.truncate()
 
+        logger.info(f"Putting upload part {part_idx+1}")
         await part_queue.put((part_idx, out_buf[:part_size_bytes]))
         out_buf = out_buf[part_size_bytes:]
         part_idx += 1
 
     if len(out_buf) > 0:
+        logger.info(f"Putting final upload part {part_idx+1}")
         await part_queue.put((part_idx, out_buf))
 
 
 async def manage_uploads(args, dataset_file_id: str, csv_args: validation.CsvArgs):
-    part_queue = asyncio.Queue(maxsize=1)
+    part_queue = asyncio.Queue(maxsize=args.concurrent_uploads)
     part_size_bytes = args.upload_part_size * 1024 * 1024
 
-    # Start csv writer coro
-    csv_rewriter = asyncio.create_task(
-        rewrite_csv(csv_args, part_size_bytes, part_queue)
-    )
-
-    coros = [csv_rewriter]
+    uploader_tasks = []
 
     for _ in range(args.concurrent_uploads):
-        coros.append(file_uploader(args, dataset_file_id, part_queue))
+        uploader_tasks.append(
+            asyncio.create_task(file_uploader(args, dataset_file_id, part_queue))
+        )
 
-    coros.append(part_queue.join())
-    done, pending = await asyncio.wait(*coros, return_when=asyncio.FIRST_EXCEPTION)
+    async def part_queue_joiner():
+        await rewrite_csv(csv_args, part_size_bytes, part_queue)
+        # now that everything is queued, join() for work to finish
+        await part_queue.join()
+
+        # now that everything is done, cancel() the otherwise idle workers
+        for uploader_task in uploader_tasks:
+            uploader_task.cancel()
+
+    coros = [part_queue_joiner(), *uploader_tasks]
+
+    # await on all tasks in case any of them raise an exception, so you
+    # can kill them all
+    done, pending = await asyncio.wait(coros, return_when=asyncio.FIRST_EXCEPTION)
 
     # if pending, an exception hit us
     for pending_fut in pending:
         pending_fut.cancel()
 
     had_exception = [
-        future.exception() for future in done if future.exception() is not None
+        future.exception()
+        for future in done
+        if not future.cancelled() and future.exception() is not None
     ]
     if had_exception:
         exc_strings = ", ".join(
@@ -236,7 +251,9 @@ def upload_dataset_file(args):
     if args.upload_part_size < 5:
         raise Exception("--upload-part-size must be greater than 5 Mb")
 
+    logger.info("Starting validation")
     csv_args = validation.validate(args)
+    logger.info("Validation complete")
 
     dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
 
