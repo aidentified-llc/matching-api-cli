@@ -13,6 +13,7 @@ import threading
 import requests
 
 import aidentified_matching_api.constants as constants
+import aidentified_matching_api.get_id as get_id
 import aidentified_matching_api.token_service as token
 import aidentified_matching_api.validation as validation
 
@@ -20,33 +21,6 @@ logger = logging.getLogger("matching_api_cli")
 
 
 UPLOAD_CANCELLED = threading.Event()
-
-
-def _get_dataset_id_from_dataset_name(args):
-    dataset_params = {"name": args.dataset_name}
-    resp_obj = token.token_service.api_call(
-        args, requests.get, "/v1/dataset/", params=dataset_params
-    )
-
-    if resp_obj["count"] == 0:
-        raise Exception(f"No dataset with name '{args.dataset_name}' found")
-
-    return resp_obj["results"][0]["dataset_id"]
-
-
-def _get_dataset_file_id_from_dataset_file_name(args):
-    dataset_params = {
-        "dataset_name": args.dataset_name,
-        "name": args.dataset_file_name,
-    }
-    resp_obj = token.token_service.api_call(
-        args, requests.get, "/v1/dataset-file/", params=dataset_params
-    )
-
-    if resp_obj["count"] == 0:
-        raise Exception(f"No dataset file with name '{args.dataset_file_name}' found")
-
-    return resp_obj["results"][0]["dataset_file_id"]
 
 
 def list_dataset_files(args):
@@ -60,7 +34,7 @@ def list_dataset_files(args):
 
 
 def abort_dataset_file(args):
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
     resp_obj = token.token_service.api_call(
         args, requests.post, f"/v1/dataset-file/{dataset_file_id}/abort-upload/"
     )
@@ -69,7 +43,7 @@ def abort_dataset_file(args):
 
 def create_dataset_file(args):
     # create files under name.
-    dataset_id = _get_dataset_id_from_dataset_name(args)
+    dataset_id = get_id.get_dataset_id_from_dataset_name(args)
 
     dataset_file_payload = {"dataset_id": dataset_id, "name": args.dataset_file_name}
     resp_obj = token.token_service.api_call(
@@ -255,7 +229,7 @@ def upload_dataset_file(args):
     csv_args = validation.validate(args)
     logger.info("Validation complete")
 
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
 
     token.token_service.api_call(
         args, requests.post, f"/v1/dataset-file/{dataset_file_id}/initiate-upload/"
@@ -272,7 +246,7 @@ def upload_dataset_file(args):
 
 
 def download_dataset_file(args):
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
 
     resp_obj = token.token_service.api_call(
         args, requests.get, f"/v1/dataset-file/{dataset_file_id}/"
@@ -292,7 +266,7 @@ def download_dataset_file(args):
 
 
 def delete_dataset_file(args):
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
 
     token.token_service.api_call(
         args, requests.delete, f"/v1/dataset-file/{dataset_file_id}/"

@@ -2,6 +2,7 @@
 import requests
 
 import aidentified_matching_api.constants as constants
+import aidentified_matching_api.get_id as get_id
 import aidentified_matching_api.token_service as token
 
 
@@ -22,8 +23,11 @@ def create_dataset(args):
 
 
 def delete_dataset(args):
-    dataset_payload = {"name": args.name}
+    args.dataset_name = args.name
+    dataset_id = get_id.get_dataset_id_from_dataset_name(args)
 
     token.token_service.api_call(
-        args, requests.delete, "/v1/dataset/", json=dataset_payload
+        args,
+        requests.delete,
+        f"/v1/dataset/{dataset_id}/",
     )

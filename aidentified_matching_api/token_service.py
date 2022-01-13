@@ -58,9 +58,13 @@ class TokenService:
             resp = requests.post(
                 f"{constants.AIDENTIFIED_URL}/login", json=login_payload
             )
-            resp_payload = resp.json()
         except requests.exceptions.RequestException as e:
             raise Exception(f"Unable to connect to API: {e}") from None
+
+        try:
+            resp_payload = resp.json()
+        except ValueError:
+            raise Exception(f"Unable to parse API response: {resp.content}") from None
 
         try:
             resp.raise_for_status()
@@ -95,13 +99,18 @@ class TokenService:
         logger.info(f"{fn.__name__} {url}")
         try:
             resp: requests.Response = fn(f"{constants.AIDENTIFIED_URL}{url}", **kwargs)
-
-            if not resp.content:
-                resp_obj = {}
-            else:
-                resp_obj = resp.json()
         except requests.RequestException as e:
             raise Exception(f"Unable to make API call: {e}") from None
+
+        if not resp.content:
+            resp_obj = {}
+        else:
+            try:
+                resp_obj = resp.json()
+            except ValueError:
+                raise Exception(
+                    f"Unable to make API call: invalid response {resp.content}"
+                ) from None
 
         try:
             resp.raise_for_status()
