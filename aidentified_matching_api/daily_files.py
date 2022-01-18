@@ -45,9 +45,9 @@ def download_dataset_file_delta(args):
     return _download_daily_file(args, "/v1/dataset-delta-file/")
 
 
-def list_dataset_event_files(args):
-    return _list_daily_files(args, "/v1/events-file/")
+def list_dataset_trigger_files(args):
+    return _list_daily_files(args, "/v1/trigger-file/")
 
 
-def download_dataset_event_file(args):
-    return _download_daily_file(args, "/v1/events-file/")
+def download_dataset_trigger_file(args):
+    return _download_daily_file(args, "/v1/trigger-file/")
