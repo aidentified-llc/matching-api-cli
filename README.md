@@ -3,7 +3,7 @@ This is a command-line wrapper around Aidentified's bulk contact matching API. I
 matching this is the easiest way to get up and running with Aidentified.
 
 ## Installation
-Requirements: Python 3.6
+Requirements: Python 3.6+
 
 To install in your system Python environment:
 
