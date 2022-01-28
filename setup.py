@@ -19,8 +19,13 @@ with open("requirements.in", "r") as fd:
 
 setup(
     name="aidentified-matching-api",
-    version="0.0.1",
+    version="0.1.0",
+    classifiers=[
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python :: 3",
+    ],
     packages=["aidentified_matching_api"],
+    python_requires=">=3.6",
     # Let's not force all the hard requirements out from requirements.txt
     # in case people are installing this thing into their system Pythons.
     install_requires=requirements,
