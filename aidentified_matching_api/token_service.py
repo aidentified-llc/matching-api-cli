@@ -17,6 +17,7 @@ import logging
 import os
 import pickle
 import urllib.parse
+import zlib
 
 import appdirs
 import requests
@@ -37,7 +38,10 @@ class TokenService:
             appname="aidentified_match", appauthor="Aidentified", version="1.0"
         )
         os.makedirs(dirs.user_cache_dir, exist_ok=True)
-        self.cache_file = os.path.join(dirs.user_cache_dir, "token_cache")
+        endpoint_hash = hex(zlib.crc32(constants.AIDENTIFIED_URL.encode("utf-8")))[2:]
+        self.cache_file = os.path.join(
+            dirs.user_cache_dir, f"token_cache_{endpoint_hash}"
+        )
 
     def _read_token_cache(self):
         try:
@@ -128,7 +132,9 @@ class TokenService:
         try:
             resp.raise_for_status()
         except requests.RequestException:
-            raise Exception(f"Unable to make API call: {resp_obj}") from None
+            raise Exception(
+                f"Unable to make API call: {resp.status_code} {resp_obj}"
+            ) from None
 
         return resp_obj
 
