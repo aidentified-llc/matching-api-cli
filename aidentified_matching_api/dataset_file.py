@@ -170,6 +170,7 @@ async def rewrite_csv(
     while True:
         row = await loop.run_in_executor(None, next, reader, SENTINEL)
         if row is SENTINEL:
+            out_buf += out_bytes_fd.getvalue()
             break
 
         writer.writerow(row)
