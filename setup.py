@@ -32,4 +32,5 @@ setup(
     entry_points={
         "console_scripts": ["aidentified_match=aidentified_matching_api:main"]
     },
+    include_package_data=True,
 )
