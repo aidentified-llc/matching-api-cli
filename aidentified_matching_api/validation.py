@@ -152,6 +152,20 @@ def validate_fd(csv_args: CsvArgs):
         if header.lower() not in HEADERS:
             raise Exception(f"Invalid header '{header}'")
 
+    sentinel = object()
+    if (
+        next(
+            (
+                header
+                for header in headers
+                if header not in ("id", "first_name", "last_name")
+            ),
+            sentinel,
+        )
+        is sentinel
+    ):
+        raise Exception("Needs at least one of the extra attribute headers")
+
     record_len = len(headers)
 
     try:

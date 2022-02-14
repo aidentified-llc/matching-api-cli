@@ -40,12 +40,16 @@ TEST_DATA = [
     (b"", "No headers in file"),
     (b"intentionally_invalid_header", "Invalid header 'intentionally_invalid_header'"),
     (b"first_name,city", "Required header last_name not in headers"),
+    (b"first_name,last_name,id", "Needs at least one of the extra attribute headers"),
     (b"first_name,last_name,city\nfoo,bar\n", "Row 2 does not match header length"),
     (
-        b"first_name,last_name,id\nfoo,bar,baz\nfoo,bar,baz",
+        b"first_name,last_name,id,city\nfoo,bar,baz,boston\nfoo,bar,baz,boston",
         "Row 3 has duplicate id 'baz'",
     ),
-    (b"first_name,last_name,id\n,bar,baz", "Row 2 has invalid value for first_name"),
+    (
+        b"first_name,last_name,id,city\n,bar,baz,boston",
+        "Row 2 has invalid value for first_name",
+    ),
 ]
 
 
@@ -61,7 +65,7 @@ def test_exc_validation(buffer, exc_msg):
 
 
 def test_tsv():
-    fd = io.BytesIO(b"first_name\tlast_name\nfoo\tbar")
+    fd = io.BytesIO(b"first_name\tlast_name\tcity\nfoo\tbar\tboston")
     csv_args = CsvArgs(
         fd,
         UTF_8,
