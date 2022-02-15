@@ -16,7 +16,7 @@ import json
 import os
 
 AIDENTIFIED_URL = os.environ.get(
-    "AIDENTIFIED_URL", "https://enterprise-matching-api.aidentified.com"
+    "AIDENTIFIED_URL", "https://matching-api.aidentified.com"
 )
 
 
