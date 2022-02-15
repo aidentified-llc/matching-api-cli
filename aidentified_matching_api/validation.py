@@ -189,6 +189,9 @@ def validate_fd(csv_args: CsvArgs):
         except StopIteration:
             break
 
+        if record_idx > 500_001:
+            raise Exception("CSV has more than 500,000 data rows")
+
         if len(record) != record_len:
             raise Exception(f"Row {record_idx} does not match header length")
 

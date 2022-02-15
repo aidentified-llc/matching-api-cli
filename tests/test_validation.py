@@ -78,3 +78,15 @@ def test_tsv():
     )
 
     validate_fd(csv_args)
+
+
+def test_size_limit():
+    header = b"first_name,last_name,city"
+    body = b"\nx,y,z"
+    fd = io.BytesIO(header + body * 500001)
+    csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
+
+    with pytest.raises(Exception) as exc:
+        validate_fd(csv_args)
+
+    assert str(exc.value) == "CSV has more than 500,000 data rows"
