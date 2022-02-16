@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+# Copyright 2022 Aidentified LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import argparse
 import csv
 import datetime
@@ -268,31 +281,33 @@ dataset_file_delta_download = dataset_file_delta_subparser.add_parser(
 dataset_file_delta_download.set_defaults(func=daily_files.download_dataset_file_delta)
 
 #
-# dataset-file event list/download
+# dataset-file trigger list/download
 #
 
-dataset_file_event_parser = dataset_files_subparser.add_parser(
-    "event", help="Manage dataset event files"
+dataset_file_trigger_parser = dataset_files_subparser.add_parser(
+    "trigger", help="Manage dataset trigger files"
 )
-dataset_file_event_subparser = dataset_file_event_parser.add_subparsers()
+dataset_file_trigger_subparser = dataset_file_trigger_parser.add_subparsers()
 
-dataset_file_event_list = dataset_file_event_subparser.add_parser(
+dataset_file_trigger_list = dataset_file_trigger_subparser.add_parser(
     "list",
-    help="List dataset event files",
+    help="List dataset trigger files",
     parents=[_get_dataset_file_parent(dataset_file_name=True)],
 )
-dataset_file_event_list.set_defaults(func=daily_files.list_dataset_event_files)
+dataset_file_trigger_list.set_defaults(func=daily_files.list_dataset_trigger_files)
 
-dataset_file_event_download = dataset_file_event_subparser.add_parser(
+dataset_file_trigger_download = dataset_file_trigger_subparser.add_parser(
     "download",
-    help="Download a dataset event file",
+    help="Download a dataset trigger file",
     parents=[
         _get_dataset_file_parent(
             dataset_file_name=True, dataset_file_download=True, file_date=True
         )
     ],
 )
-dataset_file_event_download.set_defaults(func=daily_files.download_dataset_event_file)
+dataset_file_trigger_download.set_defaults(
+    func=daily_files.download_dataset_trigger_file
+)
 
 
 def main():

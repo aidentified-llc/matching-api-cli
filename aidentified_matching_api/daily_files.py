@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+# Copyright 2022 Aidentified LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import requests
 
 import aidentified_matching_api.constants as constants
@@ -45,9 +58,9 @@ def download_dataset_file_delta(args):
     return _download_daily_file(args, "/v1/dataset-delta-file/")
 
 
-def list_dataset_event_files(args):
-    return _list_daily_files(args, "/v1/events-file/")
+def list_dataset_trigger_files(args):
+    return _list_daily_files(args, "/v1/trigger-file/")
 
 
-def download_dataset_event_file(args):
-    return _download_daily_file(args, "/v1/events-file/")
+def download_dataset_trigger_file(args):
+    return _download_daily_file(args, "/v1/trigger-file/")

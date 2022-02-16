@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+# Copyright 2022 Aidentified LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import asyncio
 import base64
 import codecs
@@ -13,6 +26,7 @@ import threading
 import requests
 
 import aidentified_matching_api.constants as constants
+import aidentified_matching_api.get_id as get_id
 import aidentified_matching_api.token_service as token
 import aidentified_matching_api.validation as validation
 
@@ -20,33 +34,6 @@ logger = logging.getLogger("matching_api_cli")
 
 
 UPLOAD_CANCELLED = threading.Event()
-
-
-def _get_dataset_id_from_dataset_name(args):
-    dataset_params = {"name": args.dataset_name}
-    resp_obj = token.token_service.api_call(
-        args, requests.get, "/v1/dataset/", params=dataset_params
-    )
-
-    if resp_obj["count"] == 0:
-        raise Exception(f"No dataset with name '{args.dataset_name}' found")
-
-    return resp_obj["results"][0]["dataset_id"]
-
-
-def _get_dataset_file_id_from_dataset_file_name(args):
-    dataset_params = {
-        "dataset_name": args.dataset_name,
-        "name": args.dataset_file_name,
-    }
-    resp_obj = token.token_service.api_call(
-        args, requests.get, "/v1/dataset-file/", params=dataset_params
-    )
-
-    if resp_obj["count"] == 0:
-        raise Exception(f"No dataset file with name '{args.dataset_file_name}' found")
-
-    return resp_obj["results"][0]["dataset_file_id"]
 
 
 def list_dataset_files(args):
@@ -60,7 +47,7 @@ def list_dataset_files(args):
 
 
 def abort_dataset_file(args):
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
     resp_obj = token.token_service.api_call(
         args, requests.post, f"/v1/dataset-file/{dataset_file_id}/abort-upload/"
     )
@@ -69,7 +56,7 @@ def abort_dataset_file(args):
 
 def create_dataset_file(args):
     # create files under name.
-    dataset_id = _get_dataset_id_from_dataset_name(args)
+    dataset_id = get_id.get_dataset_id_from_dataset_name(args)
 
     dataset_file_payload = {"dataset_id": dataset_id, "name": args.dataset_file_name}
     resp_obj = token.token_service.api_call(
@@ -183,6 +170,7 @@ async def rewrite_csv(
     while True:
         row = await loop.run_in_executor(None, next, reader, SENTINEL)
         if row is SENTINEL:
+            out_buf += out_bytes_fd.getvalue()
             break
 
         writer.writerow(row)
@@ -255,7 +243,7 @@ def upload_dataset_file(args):
     csv_args = validation.validate(args)
     logger.info("Validation complete")
 
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
 
     token.token_service.api_call(
         args, requests.post, f"/v1/dataset-file/{dataset_file_id}/initiate-upload/"
@@ -272,7 +260,7 @@ def upload_dataset_file(args):
 
 
 def download_dataset_file(args):
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
 
     resp_obj = token.token_service.api_call(
         args, requests.get, f"/v1/dataset-file/{dataset_file_id}/"
@@ -292,7 +280,7 @@ def download_dataset_file(args):
 
 
 def delete_dataset_file(args):
-    dataset_file_id = _get_dataset_file_id_from_dataset_file_name(args)
+    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
 
     token.token_service.api_call(
         args, requests.delete, f"/v1/dataset-file/{dataset_file_id}/"

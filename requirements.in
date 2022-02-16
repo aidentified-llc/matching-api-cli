@@ -1,2 +1,2 @@
-requests
-appdirs
+requests==2.*
+appdirs==1.*

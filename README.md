@@ -3,7 +3,7 @@ This is a command-line wrapper around Aidentified's bulk contact matching API. I
 matching this is the easiest way to get up and running with Aidentified.
 
 ## Installation
-Requirements: Python 3.6
+Requirements: Python 3.6+
 
 To install in your system Python environment:
 
@@ -28,8 +28,8 @@ attributes for your contacts you  must download the `delta` files, which are pro
 `dataset-file`.  The `delta` file only contains the records of contacts whose attributes have changed in the
 Aidentified system.
 
-There is also a nightly `event` file produced for each `dataset-file` that lists the most recent Money in Motion events
-for each matched contact. These files are returned in a CSV format.
+There is also a nightly `trigger` file produced for each `dataset-file` that lists the most recent Money in Motion
+events for each matched contact. These files are returned in a CSV format.
 
 The `dataset-file` follows a state machine through its matching process. The current state is available as the `status`
 field in the objects written to stdout by the `dataset-file list` subcommand. As an example:
@@ -60,7 +60,7 @@ return to `UPLOAD_NOT_STARTED` from here as `dataset-file`s are immutable.
 * MATCHING_ERROR: The Aidentified matcher was unable to complete the initial matching. An error message is available
 in the output of `dataset-file list`.
 * MATCHING_FINISHED: The initial matching of the `dataset-file` is complete and the fully-matched file is available
-for download. The system will also start producing nightly delta and event files.
+for download. The system will also start producing nightly delta and trigger files.
 
 ## Usage
 The `aidentifed_match` CLI program has extensive help for all of its functionality. Adding `--help` to any of its
@@ -169,16 +169,16 @@ aidentified_match dataset-file delta download --dataset-name DATASET_NAME --data
 Download a nightly delta file for dataset-file `DATASET_FILE_NAME` and date `FILE_DATE` to the `DATASET_FILE_PATH` location,
 creating a new file if one does not exist and truncating any existing files. Delta files are CSV files.
 
-### dataset-file event list
+### dataset-file trigger list
 ```shell
-aidentified_match dataset-file event list --dataset-name DATASET_NAME --dataset-file-name DATASET_FILE_NAME
+aidentified_match dataset-file trigger list --dataset-name DATASET_NAME --dataset-file-name DATASET_FILE_NAME
 ```
-List any nightly event files that exist for the given dataset-file.
+List any nightly trigger files that exist for the given dataset-file.
 
-### dataset-file event download
+### dataset-file trigger download
 ```shell
-aidentified_match dataset-file event download --dataset-name DATASET_NAME --dataset-file-name DATASET_FILE_NAME
+aidentified_match dataset-file trigger download --dataset-name DATASET_NAME --dataset-file-name DATASET_FILE_NAME
                                               --dataset-file-path DATASET_FILE_PATH --file-date FILE_DATE
 ```
-Download a nightly event file for dataset-file `DATASET_FILE_NAME` and date `FILE_DATE` to the `DATASET_FILE_PATH` location,
-creating a new file if one does not exist and truncating any existing files. Event files are CSV files.
+Download a nightly trigger file for dataset-file `DATASET_FILE_NAME` and date `FILE_DATE` to the `DATASET_FILE_PATH`
+location, creating a new file if one does not exist and truncating any existing files. Trigger files are CSV files.
