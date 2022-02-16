@@ -19,7 +19,7 @@ with open("requirements.in", "r") as fd:
 
 setup(
     name="aidentified-matching-api",
-    version="0.1.0",
+    version="1.0.0",
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
