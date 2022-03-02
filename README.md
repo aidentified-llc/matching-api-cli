@@ -14,7 +14,7 @@ python -m pip install aidentified-matching-api
 ## Data model
 A `dataset` is a customer-defined grouping of `dataset-file`s. The `dataset-file` is a CSV file you'd upload to
 the Aidentified contact matching and enrichment service. You can assign whatever names you'd like to your
-`dataset`s and `datset-file`s. Once a `dataset-file`'s upload is finished it can not be modified, but you can
+`dataset`s and `dataset-file`s. Once a `dataset-file`'s upload is finished it can not be modified, but you can
 always create new `dataset-file`s and delete old ones.
 
 Files must be formatted as comma-separated CSVs in the UTF-8 encoding. If your input is not in that format
