@@ -128,6 +128,15 @@ def validate(args) -> CsvArgs:
 
 
 def validate_fd(csv_args: CsvArgs):
+    potential_bom = csv_args.raw_fd.read(3)
+    # Python drops the BOM from UTF16/UTF32 but not UTF8
+    if potential_bom == codecs.BOM_UTF8:
+        skip_len = 3
+    else:
+        skip_len = 0
+    csv_args.raw_fd.seek(0)
+    csv_args.raw_fd.read(skip_len)
+
     text_fd = csv_args.codec_info.streamreader(csv_args.raw_fd)
 
     csv_reader = csv.reader(

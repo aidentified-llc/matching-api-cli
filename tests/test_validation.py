@@ -90,3 +90,26 @@ def test_size_limit():
         validate_fd(csv_args)
 
     assert str(exc.value) == "CSV has more than 500,000 data rows"
+
+
+def test_bom_strip():
+    fd = io.BytesIO(codecs.BOM_UTF8 + b"first_name,last_name,city\nfoo,bar,boston")
+    csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
+
+    validate_fd(csv_args)
+
+
+def test_nonutf8():
+    fd = io.BytesIO("first_name,last_name,city\nfoo,bar,boston".encode("UTF-16"))
+    csv_args = CsvArgs(
+        fd,
+        codecs.lookup("UTF-16"),
+        csv.excel.delimiter,
+        csv.excel.doublequote,
+        csv.excel.escapechar,
+        csv.excel.quotechar,
+        csv.excel.quoting,
+        csv.excel.skipinitialspace,
+    )
+
+    validate_fd(csv_args)
