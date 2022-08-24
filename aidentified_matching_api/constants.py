@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import csv
 import json
 import os
 
@@ -22,3 +23,10 @@ AIDENTIFIED_URL = os.environ.get(
 
 def pretty(obj):
     print(json.dumps(obj, indent=4, sort_keys=True))
+
+
+QUOTE_METHODS = {
+    "all": csv.QUOTE_ALL,
+    "minimal": csv.QUOTE_MINIMAL,
+    "none": csv.QUOTE_NONE,
+}

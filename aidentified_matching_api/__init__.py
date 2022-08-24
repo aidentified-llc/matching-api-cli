@@ -20,6 +20,7 @@ import os
 import sys
 import threading
 
+import aidentified_matching_api.constants as constants
 import aidentified_matching_api.daily_files as daily_files
 import aidentified_matching_api.dataset as dataset
 import aidentified_matching_api.dataset_file as dataset_file
@@ -173,18 +174,11 @@ def _get_dataset_file_parent(
             default=csv.excel.quotechar,
         )
 
-        QUOTE_METHODS = {
-            "all": csv.QUOTE_ALL,
-            "minimal": csv.QUOTE_MINIMAL,
-            "none": csv.QUOTE_NONE,
-        }
-
         _dataset_csv_group.add_argument(
             "--csv-quoting",
             help="Specify CSV quoting behavior. (default 'minimal'). all: quote all fields. minimal: only quote fields that need escaping. none: fields are never quoted.",
             default="minimal",
-            choices=QUOTE_METHODS.keys(),
-            type=lambda s: QUOTE_METHODS[s],
+            choices=constants.QUOTE_METHODS.keys(),
         )
 
         _dataset_csv_group.add_argument(
