@@ -16,6 +16,8 @@ import codecs
 import csv
 import io
 
+import aidentified_matching_api.constants as constants
+
 # first_name - string - required
 # last_name - string - required
 # id - string - optional; unique
@@ -114,7 +116,7 @@ def validate(args) -> CsvArgs:
         args.csv_no_doublequotes,
         args.csv_escapechar,
         args.csv_quotechar,
-        args.csv_quoting,
+        constants.QUOTE_METHODS[args.csv_quoting],
         args.csv_skip_initial_space,
     )
 
