@@ -160,7 +160,7 @@ def validate_fd(csv_args: CsvArgs):
         raise Exception("No headers in file") from None
 
     for header in headers:
-        if header.lower() not in HEADERS:
+        if header not in HEADERS:
             raise Exception(f"Invalid header '{header}'")
 
     sentinel = object()
