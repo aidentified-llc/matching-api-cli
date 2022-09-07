@@ -41,6 +41,7 @@ TEST_DATA = [
     (b"intentionally_invalid_header", "Invalid header 'intentionally_invalid_header'"),
     (b"first_name,city", "Required header last_name not in headers"),
     (b"first_name,last_name,id", "Needs at least one of the extra attribute headers"),
+    (b"first_name,last_name,ID,city", "Invalid header 'ID'"),
     (b"first_name,last_name,city\nfoo,bar\n", "Row 2 does not match header length"),
     (
         b"first_name,last_name,id,city\nfoo,bar,baz,boston\nfoo,bar,baz,boston",
