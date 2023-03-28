@@ -257,6 +257,8 @@ def upload_dataset_file(args):
         args, requests.post, f"/v1/dataset-file/{dataset_file_id}/complete-upload/"
     )
     constants.pretty(complete_resp)
+    loop.stop()
+    loop.close()
 
 
 def download_dataset_file(args):
