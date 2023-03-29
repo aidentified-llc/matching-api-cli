@@ -213,11 +213,11 @@ async def manage_uploads(args, dataset_file_id: str, csv_args: validation.CsvArg
         for uploader_task in uploader_tasks:
             uploader_task.cancel()
 
-    coros = [part_queue_joiner(), *uploader_tasks]
+    tasks = [asyncio.create_task(part_queue_joiner()), *uploader_tasks]
 
     # await on all tasks in case any of them raise an exception, so you
     # can kill them all
-    done, pending = await asyncio.wait(coros, return_when=asyncio.FIRST_EXCEPTION)
+    done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_EXCEPTION)
 
     # if pending, an exception hit us
     for pending_fut in pending:
@@ -257,6 +257,8 @@ def upload_dataset_file(args):
         args, requests.post, f"/v1/dataset-file/{dataset_file_id}/complete-upload/"
     )
     constants.pretty(complete_resp)
+    loop.stop()
+    loop.close()
 
 
 def download_dataset_file(args):
