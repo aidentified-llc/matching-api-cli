@@ -202,6 +202,17 @@ dataset_file_create = dataset_files_subparser.add_parser(
     help="Create new dataset file",
     parents=[_get_dataset_file_parent(dataset_file_name=True)],
 )
+dataset_file_create.add_argument(
+    "--include-households",
+    help="Add household members of matches to output",
+    action="store_true",
+)
+dataset_file_create.add_argument(
+    "--match-logic",
+    help="Choose matching technique. See API documentation for details. Default is OPPORTUNISTIC",
+    choices=["OPPORTUNISTIC", "ADDRESS", "EMAIL"],
+    default="OPPORTUNISTIC",
+)
 dataset_file_create.set_defaults(func=dataset_file.create_dataset_file)
 
 dataset_file_upload_group = dataset_files_subparser.add_parser(
