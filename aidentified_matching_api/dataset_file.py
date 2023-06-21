@@ -58,7 +58,12 @@ def create_dataset_file(args):
     # create files under name.
     dataset_id = get_id.get_dataset_id_from_dataset_name(args)
 
-    dataset_file_payload = {"dataset_id": dataset_id, "name": args.dataset_file_name}
+    dataset_file_payload = {
+        "dataset_id": dataset_id,
+        "name": args.dataset_file_name,
+        "include_households": args.include_households,
+        "match_logic": args.match_logic,
+    }
     resp_obj = token.token_service.api_call(
         args, requests.post, "/v1/dataset-file/", json=dataset_file_payload
     )
@@ -239,11 +244,13 @@ def upload_dataset_file(args):
     if args.upload_part_size < 5:
         raise Exception("--upload-part-size must be greater than 5 Mb")
 
-    logger.info("Starting validation")
-    csv_args = validation.validate(args)
-    logger.info("Validation complete")
+    dataset_file = get_id.get_dataset_file_from_dataset_file_name(args)
+    dataset_file_id = dataset_file["dataset_file_id"]
+    match_logic = dataset_file["match_logic"]
 
-    dataset_file_id = get_id.get_dataset_file_id_from_dataset_file_name(args)
+    logger.info("Starting validation")
+    csv_args = validation.validate(args, match_logic)
+    logger.info("Validation complete")
 
     token.token_service.api_call(
         args, requests.post, f"/v1/dataset-file/{dataset_file_id}/initiate-upload/"

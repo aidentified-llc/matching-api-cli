@@ -15,6 +15,7 @@
 import codecs
 import csv
 import io
+from typing import List
 
 import aidentified_matching_api.constants as constants
 
@@ -57,6 +58,22 @@ HEADERS = {
     *[f"domain_{idx}" for idx in range(1, 11)],
     *[f"linkedin_{idx}" for idx in range(1, 11)],
 }
+HEADERS_ADDRESS_ONLY = {
+    "id",
+    "street_address_1",
+    "street_address_2",
+    "postal_code",
+    "city",
+}
+HEADERS_EMAIL_ONLY = {
+    "id",
+    "email",
+    *[f"email_{idx}" for idx in range(1, 11)],
+}
+
+
+class ValidationError(Exception):
+    pass
 
 
 class CsvArgs:
@@ -96,18 +113,18 @@ def _csv_read(csv_reader, record_idx):
     try:
         return next(csv_reader)
     except csv.Error as e:
-        raise Exception(f"Bad CSV format in row {record_idx}: {e}") from None
+        raise ValidationError(f"Bad CSV format in row {record_idx}: {e}") from None
     except UnicodeError as e:
-        raise Exception(f"Bad character encoding at byte {e.start}") from None
+        raise ValidationError(f"Bad character encoding at byte {e.start}") from None
 
 
-def validate(args) -> CsvArgs:
+def validate(args, match_logic) -> CsvArgs:
     # Validate choice of csv encoding, even if they don't do
     # the rest of the validation.
     try:
         codec_info = codecs.lookup(args.csv_encoding)
     except LookupError:
-        raise Exception(f"Unknown csv-encoding '{args.csv_encoding}'") from None
+        raise ValidationError(f"Unknown csv-encoding '{args.csv_encoding}'") from None
 
     csv_args = CsvArgs(
         args.dataset_file_path,
@@ -123,99 +140,159 @@ def validate(args) -> CsvArgs:
     if not args.validate:
         return csv_args
 
-    validate_fd(csv_args)
+    if match_logic == "OPPORTUNISTIC":
+        validator = OpportunisticCsvValidator(csv_args)
+    elif match_logic == "ADDRESS":
+        validator = AddressCsvValidator(csv_args)
+    elif match_logic == "EMAIL":
+        validator = EmailCsvValidator(csv_args)
+    else:
+        raise ValidationError(f"Unknown match_logic '{args.match_logic}'")
+
+    validator.validate()
+
     args.dataset_file_path.seek(0)
 
     return csv_args
 
 
-def validate_fd(csv_args: CsvArgs):
-    potential_bom = csv_args.raw_fd.read(3)
-    # Python drops the BOM from UTF16/UTF32 but not UTF8
-    if potential_bom == codecs.BOM_UTF8:
-        skip_len = 3
-    else:
-        skip_len = 0
-    csv_args.raw_fd.seek(0)
-    csv_args.raw_fd.read(skip_len)
+class CsvValidator:
+    valid_headers: List[str]
+    required_headers: List[str]
 
-    text_fd = csv_args.codec_info.streamreader(csv_args.raw_fd)
+    def __init__(self, csv_args: CsvArgs):
+        potential_bom = csv_args.raw_fd.read(3)
+        # Python drops the BOM from UTF16/UTF32 but not UTF8
+        if potential_bom == codecs.BOM_UTF8:
+            skip_len = 3
+        else:
+            skip_len = 0
+        csv_args.raw_fd.seek(0)
+        csv_args.raw_fd.read(skip_len)
 
-    csv_reader = csv.reader(
-        text_fd,
-        delimiter=csv_args.delimiter,
-        doublequote=csv_args.doublequotes,
-        escapechar=csv_args.escapechar,
-        quotechar=csv_args.quotechar,
-        quoting=csv_args.quoting,
-        skipinitialspace=csv_args.skipinitialspace,
-        strict=True,
-    )
+        text_fd = csv_args.codec_info.streamreader(csv_args.raw_fd)
 
-    record_idx = 1
-
-    try:
-        headers = _csv_read(csv_reader, record_idx)
-    except StopIteration:
-        raise Exception("No headers in file") from None
-
-    for header in headers:
-        if header not in HEADERS:
-            raise Exception(f"Invalid header '{header}'")
-
-    sentinel = object()
-    if (
-        next(
-            (
-                header
-                for header in headers
-                if header not in ("id", "first_name", "last_name")
-            ),
-            sentinel,
+        csv_reader = csv.reader(
+            text_fd,
+            delimiter=csv_args.delimiter,
+            doublequote=csv_args.doublequotes,
+            escapechar=csv_args.escapechar,
+            quotechar=csv_args.quotechar,
+            quoting=csv_args.quoting,
+            skipinitialspace=csv_args.skipinitialspace,
+            strict=True,
         )
-        is sentinel
-    ):
-        raise Exception("Needs at least one of the extra attribute headers")
 
-    record_len = len(headers)
+        self.csv_reader = csv_reader
+        self.required_header_idxes = []
 
-    try:
-        id_idx = headers.index("id")
-    except ValueError:
-        id_idx = None
-    id_uniqueness = set()
+    def validate(self):
+        """Raises ValidationError when stuff goes wrong"""
+        record_idx = 1
 
-    required_header_idxes = []
-    for required_header in ("first_name", "last_name"):
-        if required_header not in headers:
-            raise Exception(f"Required header {required_header} not in headers")
-
-        required_header_idxes.append((required_header, headers.index(required_header)))
-
-    record_idx += 1
-
-    while True:
         try:
-            record = _csv_read(csv_reader, record_idx)
+            headers = _csv_read(self.csv_reader, record_idx)
         except StopIteration:
-            break
+            raise ValidationError("No headers in file") from None
 
-        if record_idx > 500_001:
-            raise Exception("CSV has more than 500,000 data rows")
+        for header in headers:
+            if header not in self.valid_headers:
+                raise ValidationError(f"Invalid header '{header}'")
 
-        if len(record) != record_len:
-            raise Exception(f"Row {record_idx} does not match header length")
+        self.validate_extra_attr_headers(headers)
 
-        if id_idx is not None:
-            cust_id = record[id_idx]
-            if cust_id in id_uniqueness:
-                raise Exception(f"Row {record_idx} has duplicate id '{cust_id}'")
-            id_uniqueness.add(cust_id)
+        record_len = len(headers)
 
-        for required_header, required_header_idx in required_header_idxes:
-            if not record[required_header_idx]:
-                raise Exception(
-                    f"Row {record_idx} has invalid value for {required_header}"
-                )
+        try:
+            id_idx = headers.index("id")
+        except ValueError:
+            id_idx = None
+        id_uniqueness = set()
+
+        self.calculate_required_header_idxes(headers)
 
         record_idx += 1
+
+        while True:
+            try:
+                record = _csv_read(self.csv_reader, record_idx)
+            except StopIteration:
+                break
+
+            if record_idx > 500_001:
+                raise ValidationError("CSV has more than 500,000 data rows")
+
+            if len(record) != record_len:
+                raise ValidationError(f"Row {record_idx} does not match header length")
+
+            if id_idx is not None:
+                cust_id = record[id_idx]
+                if cust_id in id_uniqueness:
+                    raise ValidationError(
+                        f"Row {record_idx} has duplicate id '{cust_id}'"
+                    )
+                id_uniqueness.add(cust_id)
+
+            for required_header, required_header_idx in self.required_header_idxes:
+                if not record[required_header_idx]:
+                    raise ValidationError(
+                        f"Row {record_idx} has invalid value for {required_header}"
+                    )
+
+            record_idx += 1
+
+    def validate_extra_attr_headers(self, headers: List[str]):
+        sentinel = object()
+        if (
+            next(
+                (
+                    header
+                    for header in headers
+                    if header not in ["id"] + self.required_headers
+                ),
+                sentinel,
+            )
+            is sentinel
+        ):
+            raise ValidationError("Needs at least one of the extra attribute headers")
+
+    def calculate_required_header_idxes(self, headers: List[str]):
+        for required_header in self.required_headers:
+            if required_header not in headers:
+                raise ValidationError(
+                    f"Required header {required_header} not in headers"
+                )
+
+            self.required_header_idxes.append(
+                (required_header, headers.index(required_header))
+            )
+
+
+class OpportunisticCsvValidator(CsvValidator):
+    valid_headers = HEADERS
+    required_headers = ["first_name", "last_name"]
+
+
+class AddressCsvValidator(CsvValidator):
+    valid_headers = HEADERS_ADDRESS_ONLY
+    required_headers = ["street_address_1"]
+
+    def validate_extra_attr_headers(self, headers: List[str]):
+        return
+
+
+class EmailCsvValidator(CsvValidator):
+    valid_headers = HEADERS_EMAIL_ONLY
+    required_headers = []
+
+    def validate_extra_attr_headers(self, headers: List[str]):
+        return
+
+    def calculate_required_header_idxes(self, headers: List[str]):
+        for header in ("email", "email_1"):
+            if header in headers:
+                self.required_header_idxes.append((header, headers.index(header)))
+                return
+
+        if not self.required_header_idxes:
+            raise ValidationError("Required header email_N not in headers")

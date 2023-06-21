@@ -64,8 +64,10 @@ dataset_subparser = dataset_parser.add_subparsers()
 
 
 _dataset_parent = argparse.ArgumentParser(add_help=False)
-_dataset_parent_group = _dataset_parent.add_argument_group(title="required arguments")
-_dataset_parent_group.add_argument("--name", help="Dataset name", required=True)
+_dataset_parent_arg_group = _dataset_parent.add_argument_group(
+    title="required arguments"
+)
+_dataset_parent_arg_group.add_argument("--name", help="Dataset name", required=True)
 
 dataset_list = dataset_subparser.add_parser("list", help="List datasets")
 dataset_list.set_defaults(func=dataset.list_datasets)
@@ -200,9 +202,20 @@ dataset_file_create = dataset_files_subparser.add_parser(
     help="Create new dataset file",
     parents=[_get_dataset_file_parent(dataset_file_name=True)],
 )
+dataset_file_create.add_argument(
+    "--include-households",
+    help="Add household members of matches to output",
+    action="store_true",
+)
+dataset_file_create.add_argument(
+    "--match-logic",
+    help="Choose matching technique. See API documentation for details. Default is OPPORTUNISTIC",
+    choices=["OPPORTUNISTIC", "ADDRESS", "EMAIL"],
+    default="OPPORTUNISTIC",
+)
 dataset_file_create.set_defaults(func=dataset_file.create_dataset_file)
 
-dataset_file_create = dataset_files_subparser.add_parser(
+dataset_file_upload_group = dataset_files_subparser.add_parser(
     "upload",
     help="Upload dataset file",
     parents=[
@@ -211,17 +224,17 @@ dataset_file_create = dataset_files_subparser.add_parser(
         )
     ],
 )
-dataset_file_create.add_argument(
+dataset_file_upload_group.add_argument(
     "--upload-part-size",
     help="Size of upload chunk in megabytes",
     type=int,
     default=100,
 )
-dataset_file_create.add_argument(
+dataset_file_upload_group.add_argument(
     "--concurrent-uploads", help="Max number of concurrent uploads", type=int, default=4
 )
-dataset_file_create.set_defaults(func=dataset_file.upload_dataset_file)
-dataset_file_create.set_defaults(upload_dataset_file_lock=threading.Lock())
+dataset_file_upload_group.set_defaults(func=dataset_file.upload_dataset_file)
+dataset_file_upload_group.set_defaults(upload_dataset_file_lock=threading.Lock())
 
 dataset_file_abort = dataset_files_subparser.add_parser(
     "abort",
@@ -230,14 +243,14 @@ dataset_file_abort = dataset_files_subparser.add_parser(
 )
 dataset_file_abort.set_defaults(func=dataset_file.abort_dataset_file)
 
-dataset_file_download = dataset_files_subparser.add_parser(
+dataset_file_download_group = dataset_files_subparser.add_parser(
     "download",
     help="Download matched dataset file",
     parents=[
         _get_dataset_file_parent(dataset_file_name=True, dataset_file_download=True)
     ],
 )
-dataset_file_download.set_defaults(func=dataset_file.download_dataset_file)
+dataset_file_download_group.set_defaults(func=dataset_file.download_dataset_file)
 
 
 dataset_file_delete = dataset_files_subparser.add_parser(

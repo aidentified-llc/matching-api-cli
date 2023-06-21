@@ -18,8 +18,11 @@ import io
 
 import pytest
 
+from aidentified_matching_api.validation import AddressCsvValidator
 from aidentified_matching_api.validation import CsvArgs
-from aidentified_matching_api.validation import validate_fd
+from aidentified_matching_api.validation import EmailCsvValidator
+from aidentified_matching_api.validation import OpportunisticCsvValidator
+from aidentified_matching_api.validation import ValidationError
 
 
 UTF_8 = codecs.lookup("UTF-8")
@@ -58,9 +61,10 @@ TEST_DATA = [
 def test_exc_validation(buffer, exc_msg):
     fd = io.BytesIO(buffer)
     csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
+    validator = OpportunisticCsvValidator(csv_args)
 
-    with pytest.raises(Exception) as exc:
-        validate_fd(csv_args)
+    with pytest.raises(ValidationError) as exc:
+        validator.validate()
 
     assert str(exc.value) == exc_msg
 
@@ -77,8 +81,9 @@ def test_tsv():
         csv.QUOTE_NONE,
         csv.excel.skipinitialspace,
     )
+    validator = OpportunisticCsvValidator(csv_args)
 
-    validate_fd(csv_args)
+    validator.validate()
 
 
 def test_size_limit():
@@ -86,9 +91,10 @@ def test_size_limit():
     body = b"\nx,y,z"
     fd = io.BytesIO(header + body * 500001)
     csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
+    validator = OpportunisticCsvValidator(csv_args)
 
-    with pytest.raises(Exception) as exc:
-        validate_fd(csv_args)
+    with pytest.raises(ValidationError) as exc:
+        validator.validate()
 
     assert str(exc.value) == "CSV has more than 500,000 data rows"
 
@@ -96,8 +102,9 @@ def test_size_limit():
 def test_bom_strip():
     fd = io.BytesIO(codecs.BOM_UTF8 + b"first_name,last_name,city\nfoo,bar,boston")
     csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
+    validator = OpportunisticCsvValidator(csv_args)
 
-    validate_fd(csv_args)
+    validator.validate()
 
 
 def test_nonutf8():
@@ -112,5 +119,44 @@ def test_nonutf8():
         csv.excel.quoting,
         csv.excel.skipinitialspace,
     )
+    validator = OpportunisticCsvValidator(csv_args)
 
-    validate_fd(csv_args)
+    validator.validate()
+
+
+ADDRESS_TEST_DATA = [
+    (b"id,street_address_1,title\n1,123 fake st,xxx", "Invalid header 'title'"),
+    (b"id,city\n1,omaha", "Required header street_address_1 not in headers"),
+    (b"id,street_address_1\n1,", "Row 2 has invalid value for street_address_1"),
+]
+
+
+@pytest.mark.parametrize("buffer, exc_msg", ADDRESS_TEST_DATA)
+def test_address_csv_header(buffer, exc_msg):
+    fd = io.BytesIO(buffer)
+    csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
+    validator = AddressCsvValidator(csv_args)
+
+    with pytest.raises(ValidationError) as exc:
+        validator.validate()
+
+    assert str(exc.value) == exc_msg
+
+
+EMAIL_TEST_DATA = [
+    (b"id,city,email\n1,123 fake st,xxx", "Invalid header 'city'"),
+    (b"id,email\n1,", "Row 2 has invalid value for email"),
+    (b"id,email_1\n1,", "Row 2 has invalid value for email_1"),
+]
+
+
+@pytest.mark.parametrize("buffer, exc_msg", EMAIL_TEST_DATA)
+def test_email_csv_header(buffer, exc_msg):
+    fd = io.BytesIO(buffer)
+    csv_args = CsvArgs(fd, *ORDINARY_CSV_ARGS)
+    validator = EmailCsvValidator(csv_args)
+
+    with pytest.raises(ValidationError) as exc:
+        validator.validate()
+
+    assert str(exc.value) == exc_msg

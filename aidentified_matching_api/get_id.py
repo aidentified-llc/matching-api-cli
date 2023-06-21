@@ -29,7 +29,7 @@ def get_dataset_id_from_dataset_name(args):
     return resp_obj["results"][0]["dataset_id"]
 
 
-def get_dataset_file_id_from_dataset_file_name(args):
+def get_dataset_file_from_dataset_file_name(args):
     dataset_params = {
         "dataset_name": args.dataset_name,
         "name": args.dataset_file_name,
@@ -41,4 +41,8 @@ def get_dataset_file_id_from_dataset_file_name(args):
     if resp_obj["count"] == 0:
         raise Exception(f"No dataset file with name '{args.dataset_file_name}' found")
 
-    return resp_obj["results"][0]["dataset_file_id"]
+    return resp_obj["results"][0]
+
+
+def get_dataset_file_id_from_dataset_file_name(args):
+    return get_dataset_file_from_dataset_file_name(args)["dataset_file_id"]
