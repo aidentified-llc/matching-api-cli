@@ -27,7 +27,7 @@ repos:
     hooks:
       - id: reorder-python-imports
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 24.3.0
     hooks:
       - id: black
         language_version: python3.9
@@ -35,12 +35,12 @@ repos:
   # Run flake8 last, to catch any remaining issues not caught/fixed by
   # the other hooks.
   - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
+    rev: 7.0.0
     hooks:
       - id: flake8
         exclude: ^manage.py$
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: insert-license
         files: \.py$
