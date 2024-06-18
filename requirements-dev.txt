@@ -24,7 +24,7 @@ distlib==0.3.8
     # via virtualenv
 docutils==0.21.2
     # via readme-renderer
-filelock==3.14.0
+filelock==3.15.1
     # via virtualenv
 identify==2.5.36
     # via pre-commit
@@ -97,7 +97,7 @@ rich==13.7.1
     # via twine
 twine==5.1.0
     # via -r requirements-dev.in
-urllib3==2.2.1
+urllib3==2.2.2
     # via
     #   requests
     #   twine
