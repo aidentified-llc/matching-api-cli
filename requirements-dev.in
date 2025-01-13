@@ -1,5 +1,5 @@
 -r requirements.in
-pytest==7.*
+pytest==8.*
 pre-commit
 build
 twine
