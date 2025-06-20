@@ -10,25 +10,27 @@ build==1.2.2.post1
     # via
     #   -r requirements-dev.in
     #   pip-tools
-certifi==2024.12.14
+certifi==2025.6.15
     # via requests
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
-click==8.1.8
+click==8.2.1
     # via pip-tools
 distlib==0.3.9
     # via virtualenv
 docutils==0.21.2
     # via readme-renderer
-filelock==3.16.1
+filelock==3.18.0
     # via virtualenv
-identify==2.6.5
+id==1.5.0
+    # via twine
+identify==2.6.12
     # via pre-commit
 idna==3.10
     # via requests
-iniconfig==2.0.0
+iniconfig==2.1.0
     # via pytest
 jaraco-classes==3.4.0
     # via keyring
@@ -42,67 +44,67 @@ markdown-it-py==3.0.0
     # via rich
 mdurl==0.1.2
     # via markdown-it-py
-more-itertools==10.5.0
+more-itertools==10.7.0
     # via
     #   jaraco-classes
     #   jaraco-functools
-nh3==0.2.20
+nh3==0.2.21
     # via readme-renderer
 nodeenv==1.9.1
     # via pre-commit
-packaging==24.2
+packaging==25.0
     # via
     #   build
     #   pytest
     #   twine
 pip-tools==7.4.1
     # via -r requirements-dev.in
-pkginfo==1.12.0
-    # via twine
-platformdirs==4.3.6
+platformdirs==4.3.8
     # via virtualenv
-pluggy==1.5.0
+pluggy==1.6.0
     # via pytest
-pre-commit==4.0.1
+pre-commit==4.2.0
     # via -r requirements-dev.in
 pygments==2.19.1
     # via
+    #   pytest
     #   readme-renderer
     #   rich
 pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
-pytest==8.3.4
+pytest==8.4.1
     # via -r requirements-dev.in
 pyyaml==6.0.2
     # via pre-commit
 readme-renderer==44.0
     # via twine
-requests==2.32.3
+requests==2.32.4
     # via
     #   -r /Users/david/src/matching-api-cli/requirements.in
+    #   id
     #   requests-toolbelt
     #   twine
 requests-toolbelt==1.0.0
     # via twine
 rfc3986==2.0.0
     # via twine
-rich==13.9.4
+rich==14.0.0
     # via twine
-twine==6.0.1
+twine==6.1.0
     # via -r requirements-dev.in
-urllib3==2.3.0
+urllib3==2.5.0
     # via
     #   requests
     #   twine
-virtualenv==20.28.1
+virtualenv==20.31.2
     # via pre-commit
 wheel==0.45.1
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==24.3.1
+pip==25.1.1
     # via pip-tools
-setuptools==75.8.0
+setuptools==80.9.0
     # via pip-tools
