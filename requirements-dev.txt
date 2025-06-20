@@ -92,7 +92,7 @@ rich==13.9.4
     # via twine
 twine==6.0.1
     # via -r requirements-dev.in
-urllib3==2.3.0
+urllib3==2.5.0
     # via
     #   requests
     #   twine
