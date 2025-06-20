@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     packages=["aidentified_matching_api"],
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     # Let's not force all the hard requirements out from requirements.txt
     # in case people are installing this thing into their system Pythons.
     install_requires=requirements,

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: check-symlinks
       # - id: check-executables-have-shebangs
@@ -23,19 +23,19 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.12.0
+    rev: v3.15.0
     hooks:
       - id: reorder-python-imports
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 25.1.0
     hooks:
       - id: black
-        language_version: python3.9
+        language_version: python3.10
         args: ['-l', '88']
   # Run flake8 last, to catch any remaining issues not caught/fixed by
   # the other hooks.
   - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
+    rev: 7.2.0
     hooks:
       - id: flake8
         exclude: ^manage.py$

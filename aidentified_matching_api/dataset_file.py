@@ -188,13 +188,13 @@ async def rewrite_csv(
         out_bytes_fd.seek(0)
         out_bytes_fd.truncate()
 
-        logger.info(f"Putting upload part {part_idx+1}")
+        logger.info(f"Putting upload part {part_idx + 1}")
         await part_queue.put((part_idx, out_buf[:part_size_bytes]))
         out_buf = out_buf[part_size_bytes:]
         part_idx += 1
 
     if len(out_buf) > 0:
-        logger.info(f"Putting final upload part {part_idx+1}")
+        logger.info(f"Putting final upload part {part_idx + 1}")
         await part_queue.put((part_idx, out_buf))
 
 
