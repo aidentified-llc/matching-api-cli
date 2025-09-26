@@ -60,7 +60,10 @@ class TokenService:
     def get_token(self, args) -> str:
         self._read_token_cache()
 
-        if datetime.datetime.utcnow().timestamp() < self.expires_at:
+        if (
+            datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+            < self.expires_at
+        ):
             return self.token
 
         # N.B. these are read from envvars AID_EMAIL and
@@ -90,10 +93,9 @@ class TokenService:
                 f"Bad response from API: {resp.status_code} {resp_payload}"
             ) from None
 
-        expires_at_dt = (
-            datetime.timedelta(seconds=resp_payload["expires_in"])
-            + datetime.datetime.utcnow()
-        )
+        expires_at_dt = datetime.timedelta(
+            seconds=resp_payload["expires_in"]
+        ) + datetime.datetime.now(tz=datetime.timezone.utc)
 
         self.expires_at = expires_at_dt.timestamp()
         self.token = resp_payload["bearer_token"]
