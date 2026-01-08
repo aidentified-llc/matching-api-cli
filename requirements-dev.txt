@@ -106,7 +106,7 @@ secretstorage==3.5.0
     # via keyring
 twine==6.2.0
     # via -r requirements-dev.in
-urllib3==2.6.1
+urllib3==2.6.3
     # via
     #   requests
     #   twine
