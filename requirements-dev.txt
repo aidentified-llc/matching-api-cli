@@ -8,19 +8,19 @@ certifi==2026.2.25
     # via requests
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
     # via requests
 distlib==0.4.0
     # via virtualenv
 docutils==0.22.4
     # via readme-renderer
-filelock==3.25.0
+filelock==3.25.2
     # via
     #   python-discovery
     #   virtualenv
 id==1.6.1
     # via twine
-identify==2.6.17
+identify==2.6.18
     # via pre-commit
 idna==3.11
     # via requests
@@ -28,7 +28,7 @@ iniconfig==2.3.0
     # via pytest
 jaraco-classes==3.4.0
     # via keyring
-jaraco-context==6.1.0
+jaraco-context==6.1.2
     # via keyring
 jaraco-functools==4.4.0
     # via keyring
@@ -51,7 +51,7 @@ packaging==26.0
     #   build
     #   pytest
     #   twine
-platformdirs==4.9.2
+platformdirs==4.9.4
     # via
     #   python-discovery
     #   virtualenv
@@ -68,7 +68,7 @@ pyproject-hooks==1.2.0
     # via build
 pytest==8.4.2
     # via -r requirements-dev.in
-python-discovery==1.1.0
+python-discovery==1.2.0
     # via virtualenv
 pyyaml==6.0.3
     # via pre-commit
@@ -92,7 +92,7 @@ urllib3==2.6.3
     #   id
     #   requests
     #   twine
-uv==0.10.8
+uv==0.10.12
     # via -r requirements-dev.in
-virtualenv==21.1.0
+virtualenv==21.2.0
     # via pre-commit
