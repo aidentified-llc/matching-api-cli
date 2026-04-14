@@ -82,7 +82,7 @@ pygments==2.20.0
     #   rich
 pyproject-hooks==1.2.0
     # via build
-pytest==8.4.2
+pytest==9.0.3
     # via -r requirements-dev.in
 python-discovery==1.2.0
     # via virtualenv
