@@ -24,7 +24,6 @@ import requests
 
 import aidentified_matching_api.constants as constants
 
-
 logger = logging.getLogger("api")
 
 

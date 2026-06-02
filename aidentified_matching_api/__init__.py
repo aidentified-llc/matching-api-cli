@@ -26,7 +26,6 @@ import aidentified_matching_api.dataset as dataset
 import aidentified_matching_api.dataset_file as dataset_file
 import aidentified_matching_api.token_service as token_service
 
-
 parser = argparse.ArgumentParser(
     description="Aidentified matching API command line wrapper"
 )

@@ -22,14 +22,14 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.15.0
+    rev: v3.16.0
     hooks:
       - id: reorder-python-imports
   - repo: https://github.com/psf/black
-    rev: 25.9.0
+    rev: 26.5.1
     hooks:
       - id: black
-        language_version: python3.10
+        language_version: python3.12
         args: ['-l', '88']
   # Run flake8 last, to catch any remaining issues not caught/fixed by
   # the other hooks.
@@ -39,7 +39,7 @@ repos:
       - id: flake8
         exclude: ^manage.py$
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.5
+    rev: v1.5.6
     hooks:
       - id: insert-license
         files: \.py$

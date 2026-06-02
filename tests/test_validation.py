@@ -24,7 +24,6 @@ from aidentified_matching_api.validation import EmailCsvValidator
 from aidentified_matching_api.validation import OpportunisticCsvValidator
 from aidentified_matching_api.validation import ValidationError
 
-
 UTF_8 = codecs.lookup("UTF-8")
 
 ORDINARY_CSV_ARGS = [
