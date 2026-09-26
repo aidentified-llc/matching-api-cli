@@ -96,7 +96,7 @@ async def file_uploader(args, dataset_file_id: str, part_queue: asyncio.Queue):
             json=upload_part_payload,
         )
         resp = await loop.run_in_executor(None, upload_part_callable)
-        upload_url = resp["upload_url"]
+        upload_url = constants.check_presigned_url(resp["upload_url"])
         dataset_file_upload_part_id = resp["dataset_file_upload_part_id"]
 
         logger.info(f"Starting upload part {aws_part_number} upload")
@@ -105,6 +105,7 @@ async def file_uploader(args, dataset_file_id: str, part_queue: asyncio.Queue):
             upload_url,
             data=part_data,
             headers={"content-md5": md5},
+            allow_redirects=False,
         )
         try:
             upload_resp = await loop.run_in_executor(None, put_part_callable)
@@ -278,9 +279,19 @@ def download_dataset_file(args):
         raise Exception("Dataset file is not ready for download.")
 
     try:
-        download_req = requests.get(resp_obj["download_url"])
+        download_req = requests.get(
+            constants.check_presigned_url(resp_obj["download_url"]),
+            allow_redirects=False,
+        )
     except requests.exceptions.RequestException as e:
         raise Exception(f"Unable to download file: {e}") from None
+
+    try:
+        download_req.raise_for_status()
+    except requests.exceptions.RequestException:
+        raise Exception(
+            f"Unable to download file: {download_req.status_code} {download_req.text}"
+        ) from None
 
     for chunk in download_req.iter_content(chunk_size=1024 * 1024 * 1024):
         args.dataset_file_path.write(chunk)

@@ -22,8 +22,8 @@ import aidentified_matching_api
 import aidentified_matching_api.daily_files as daily_files
 
 DAILY_FILES = [
-    {"file_date": "2026-09-25", "download_url": "https://example.com/0925"},
-    {"file_date": "2026-09-24", "download_url": "https://example.com/0924"},
+    {"file_date": "2026-09-25", "download_url": "https://bucket.s3.amazonaws.com/0925"},
+    {"file_date": "2026-09-24", "download_url": "https://bucket.s3.amazonaws.com/0924"},
 ]
 
 
@@ -95,7 +95,9 @@ def test_download_selects_file_date(paginated_api_call, requests_get):
         "/v1/dataset-delta-file/",
         params={"dataset_name": "ds", "dataset_file_name": "dsf"},
     )
-    requests_get.assert_called_once_with("https://example.com/0924")
+    requests_get.assert_called_once_with(
+        "https://bucket.s3.amazonaws.com/0924", allow_redirects=False
+    )
     args.dataset_file_path.write.assert_called_once_with(b"a,b\n")
 
 

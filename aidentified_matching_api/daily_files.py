@@ -45,9 +45,19 @@ def _download_daily_file(args, route: str):
         raise Exception(f"No file found for date {file_date}")
 
     try:
-        download_req = requests.get(daily_file["download_url"])
+        download_req = requests.get(
+            constants.check_presigned_url(daily_file["download_url"]),
+            allow_redirects=False,
+        )
     except requests.exceptions.RequestException as e:
         raise Exception(f"Unable to download file: {e}") from None
+
+    try:
+        download_req.raise_for_status()
+    except requests.exceptions.RequestException:
+        raise Exception(
+            f"Unable to download file: {download_req.status_code} {download_req.text}"
+        ) from None
 
     for chunk in download_req.iter_content(chunk_size=1024 * 1024 * 1024):
         args.dataset_file_path.write(chunk)
