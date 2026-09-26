@@ -15,10 +15,26 @@
 import csv
 import json
 import os
+import re
+import urllib.parse
 
 AIDENTIFIED_URL = os.environ.get(
     "AIDENTIFIED_URL", "https://matching-api.aidentified.com"
 )
+
+
+# Download and upload URLs handed out by the API are presigned S3 URLs.
+# Refuse to follow anything else.
+S3_HOST_RE = re.compile(r"(^|\.)s3([.-][a-z0-9-]+)*\.amazonaws\.com$")
+
+
+def check_presigned_url(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https" or not S3_HOST_RE.search(parsed.hostname or ""):
+        raise Exception(
+            f"Refusing to use presigned URL with unexpected host: {parsed.hostname}"
+        )
+    return url
 
 
 def pretty(obj):

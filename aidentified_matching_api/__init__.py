@@ -131,7 +131,7 @@ def _get_dataset_file_parent(
             "--file-date",
             help="Date of the delta file in YYYY-MM-DD format",
             required=True,
-            type=lambda s: datetime.datetime.strptime("%Y-%m-%d", s),
+            type=lambda s: datetime.datetime.strptime(s, "%Y-%m-%d").date(),
         )
 
     if validation:
