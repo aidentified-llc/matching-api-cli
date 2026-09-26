@@ -35,12 +35,17 @@ def _download_daily_file(args, route: str):
         "dataset_name": args.dataset_name,
         "dataset_file_name": args.dataset_file_name,
     }
-    resp_obj = token.token_service.api_call(
+    daily_files = token.token_service.paginated_api_call(
         args, requests.get, route, params=dataset_params
     )
 
+    file_date = args.file_date.isoformat()
+    daily_file = next((df for df in daily_files if df["file_date"] == file_date), None)
+    if daily_file is None:
+        raise Exception(f"No file found for date {file_date}")
+
     try:
-        download_req = requests.get(resp_obj["download_url"])
+        download_req = requests.get(daily_file["download_url"])
     except requests.exceptions.RequestException as e:
         raise Exception(f"Unable to download file: {e}") from None
 
