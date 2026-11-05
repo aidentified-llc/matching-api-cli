@@ -17,7 +17,7 @@ pre-commit run --all-files                                # lint/format (black -
 ./deploy.sh                                               # python -m build && twine upload to PyPI
 ```
 
-- CI runs pytest on Python 3.10–3.13 (`setup.py` has `python_requires=">=3.10"`), plus pre-commit.
+- CI runs pytest on Python 3.11–3.13 (`setup.py` has `python_requires=">=3.11"`), plus pre-commit.
 - Runtime dependencies come from `requirements.in`, which `setup.py` reads directly into `install_requires`. Keep them loosely pinned (`requests==2.*`); `requirements.txt` holds the fully pinned lock.
 - The version number is hardcoded in `setup.py`. Bump it there before a release.
 - Every `.py` file must start with the Apache license header from `.github/license_header.txt`. The `insert-license` pre-commit hook adds it.
