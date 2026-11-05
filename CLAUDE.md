@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```shell
-pip install -r requirements-dev.txt && pip install -e .   # dev setup (same as CI)
+pip install -r requirements-dev.txt && pip install -e .   # dev setup (same as CI on 3.11+)
 pytest                                                    # all tests
 pytest tests/test_validation.py::test_exc_validation      # one test
 pre-commit run --all-files                                # lint/format (black -l 88, reorder-python-imports, flake8, license header)
@@ -17,7 +17,7 @@ pre-commit run --all-files                                # lint/format (black -
 ./deploy.sh                                               # python -m build && twine upload to PyPI
 ```
 
-- CI runs pytest on Python 3.10–3.13 (`setup.py` has `python_requires=">=3.10"`), plus pre-commit.
+- CI runs pytest on Python 3.10–3.13 (`setup.py` has `python_requires=">=3.10"`), plus pre-commit. `requirements-dev.txt` needs Python 3.11+ because of its `filelock` pin, so the 3.10 job installs `requirements.txt` plus pytest instead.
 - Runtime dependencies come from `requirements.in`, which `setup.py` reads directly into `install_requires`. Keep them loosely pinned (`requests==2.*`); `requirements.txt` holds the fully pinned lock.
 - The version number is hardcoded in `setup.py`. Bump it there before a release.
 - Every `.py` file must start with the Apache license header from `.github/license_header.txt`. The `insert-license` pre-commit hook adds it.
